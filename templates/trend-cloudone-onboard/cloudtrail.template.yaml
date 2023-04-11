@@ -39,6 +39,8 @@ Resources:
             comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
           - id: CKV_AWS_117
             comment: Lambda does not need to communicate with VPC resources.
+          - id: CKV_AWS_173
+            comment: Environment variables are not sensitive.
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.9
