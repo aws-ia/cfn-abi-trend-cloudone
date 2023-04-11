@@ -20,11 +20,6 @@ Parameters:
        - jp-1
        - ca-1
        - de-1
-  DeadLetterQueue:
-    Description: Dead Letter Queue for Lambda Function
-    Type: String
-    Default: !Ref AWS::NoValue
-  
 
 Resources:
 #Role for adding AWS Connector to C1WS
@@ -89,6 +84,23 @@ Resources:
 
 #Get External ID
   GetExternalIDLambda:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.9
@@ -97,9 +109,6 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt AWSConnectorLambdaFunctionRole.Arn
-      DeadLetterConfig:
-        TargetArn: !Ref DeadLetterQueue
-      ReservedConcurrentExecutions: 1
       Code:
         ZipFile:
           !Sub
@@ -155,6 +164,23 @@ Resources:
 
 #Create AWS Connector
   AWSConnectorCreateLambda:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.9
@@ -163,9 +189,6 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt AWSConnectorLambdaFunctionRole.Arn
-      DeadLetterConfig:
-        TargetArn: !Ref DeadLetterQueue
-      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           awsaccountid: !Ref AWS::AccountId

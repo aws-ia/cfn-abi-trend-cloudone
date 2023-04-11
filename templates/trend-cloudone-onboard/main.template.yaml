@@ -73,17 +73,11 @@ Conditions:
     !Equals ["True", !Ref CreateNewTrail]
 
 Resources:
-  DeadLetterQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      SqsManagedSseEnabled: true
-
   GetCloudOneRegionAndAccountStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
-        DeadLetterQueue: !Ref DeadLetterQueue
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}get-cloudone-region-and-account.yaml'
 
   VisionOneEnrollmentStack:
@@ -93,7 +87,6 @@ Resources:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         VisionOneServiceToken: !Ref VisionOneServiceToken
-        DeadLetterQueue: !Ref DeadLetterQueue
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}vision-one-enrollment.template.yaml'
 
   WorkloadSecurityIntegrationStack:
@@ -102,7 +95,6 @@ Resources:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
-        DeadLetterQueue: !Ref DeadLetterQueue
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}workloadsecurity.template.yaml'
     DependsOn:
       - VisionOneEnrollmentStack
@@ -114,7 +106,6 @@ Resources:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         CloudOneAccountID: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneAccountId
         CloudOneApiKey: !Ref CloudOneApiKey
-        DeadLetterQueue: !Ref DeadLetterQueue
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudone.template.yaml'
     DependsOn:
       - VisionOneEnrollmentStack
@@ -125,7 +116,6 @@ Resources:
       Parameters:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         CloudOneApiKey: !Ref CloudOneApiKey
-        DeadLetterQueue: !Ref DeadLetterQueue
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudtrail.template.yaml'
     DependsOn:
       - CloudOneIntegrationStack
