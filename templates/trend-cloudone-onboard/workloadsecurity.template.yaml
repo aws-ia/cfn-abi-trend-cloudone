@@ -20,6 +20,10 @@ Parameters:
        - jp-1
        - ca-1
        - de-1
+  DeadLetterQueue:
+    Description: Dead Letter Queue for Lambda Function
+    Type: String
+    Default: !Ref AWS::NoValue
   
 
 Resources:
@@ -93,6 +97,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt AWSConnectorLambdaFunctionRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Code:
         ZipFile:
           !Sub
@@ -156,6 +163,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt AWSConnectorLambdaFunctionRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           awsaccountid: !Ref AWS::AccountId

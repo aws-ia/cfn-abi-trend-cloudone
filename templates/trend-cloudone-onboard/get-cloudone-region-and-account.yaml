@@ -6,6 +6,10 @@ Parameters:
     Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
+  DeadLetterQueue:
+    Description: Dead Letter Queue for Lambda Function
+    Type: String
+    Default: !Ref AWS::NoValue
   
 Resources:
   GetCloudOneRegionAndAccountFunction:
@@ -17,6 +21,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt GetCloudOneRegionAndAccountRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           CloudOneApiKey: !Ref CloudOneApiKey

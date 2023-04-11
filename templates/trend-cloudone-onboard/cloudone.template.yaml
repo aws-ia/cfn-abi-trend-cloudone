@@ -23,6 +23,10 @@ Parameters:
        - jp-1
        - ca-1
        - de-1
+  DeadLetterQueue:
+    Description: Dead Letter Queue for Lambda Function
+    Type: String
+    Default: !Ref AWS::NoValue
   
 
 Resources:
@@ -44,6 +48,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt AddAWSAccountToCloudOneFunctionRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           CloudOneRoleArn: !GetAtt CloudOneIntegrationStack.Outputs.CloudOneRoleArn
@@ -133,4 +140,4 @@ Resources:
             - - "arn:"
               - Ref: AWS::Partition
               - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  
+   

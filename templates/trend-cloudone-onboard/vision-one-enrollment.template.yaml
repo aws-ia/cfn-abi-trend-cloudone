@@ -23,6 +23,10 @@ Parameters:
   VisionOneServiceToken:
     Description: Vision One Service Token. See step 1 at https://docs.trendmicro.com/en-us/enterprise/trend-micro-xdr-help/ConfiguringCloudOneWorkloadSecurity/
     Type: String
+  DeadLetterQueue:
+    Description: Dead Letter Queue for Lambda Function
+    Type: String
+    Default: !Ref AWS::NoValue
   
 
 Resources:
@@ -35,6 +39,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt VisionOneEnrollmentFunctionRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           CloudOneRegion: !Ref CloudOneRegion

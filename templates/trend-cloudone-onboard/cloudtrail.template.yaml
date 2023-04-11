@@ -19,6 +19,10 @@ Parameters:
        - in-1
        - jp-1
        - ca-1
+  DeadLetterQueue:
+    Description: Dead Letter Queue for Lambda Function
+    Type: String
+    Default: !Ref AWS::NoValue
 
 Resources:
   GetCloudTrailStackParametersFunction:
@@ -30,6 +34,9 @@ Resources:
       Timeout: 60
       Handler: index.lambda_handler
       Role: !GetAtt GetCloudTrailStackParametersRole.Arn
+      DeadLetterConfig:
+        TargetArn: !Ref DeadLetterQueue
+      ReservedConcurrentExecutions: 1
       Environment:
         Variables:
           CloudOneRegion: !Ref CloudOneRegion
