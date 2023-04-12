@@ -11,6 +11,8 @@ Metadata:
       - VisionOneServiceToken
       - CreateNewTrail
       - ExistingCloudtrailBucketName
+      - TrendSolutionTagKey
+      - TrendSolutionName
     - Label:
         default: 'Warning: Do not modify the fields below unless you know what you
          are doing. Modifications may cause your deployment to fail.'
@@ -48,6 +50,14 @@ Parameters:
       to Trend Micro Cloud One.
     Type: String
     Default: EnterAValueHere
+  TrendSolutionTagKey:
+    Description: Tag Key to be used for Trend Cloud One resources
+    Type: String
+    Default: Solution
+  TrendSolutionName:
+    Description: Tag Key to be used for Trend Cloud One resources
+    Type: String
+    Default: 'Trend Cloud One'
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -74,6 +84,7 @@ Conditions:
 
 Resources:
   GetCloudOneRegionAndAccountStack:
+    DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
@@ -81,44 +92,59 @@ Resources:
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}get-cloudone-region-and-account.yaml'
 
   VisionOneEnrollmentStack:
+    DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         VisionOneServiceToken: !Ref VisionOneServiceToken
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3Prefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}vision-one-enrollment.template.yaml'
 
   WorkloadSecurityIntegrationStack:
+    DependsOn:
+      - VisionOneEnrollmentStack
+      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3Prefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}workloadsecurity.template.yaml'
-    DependsOn:
-      - VisionOneEnrollmentStack
+    
 
   CloudOneIntegrationStack:
+    DependsOn:
+      - VisionOneEnrollmentStack
+      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         CloudOneAccountID: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneAccountId
         CloudOneApiKey: !Ref CloudOneApiKey
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3Prefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudone.template.yaml'
-    DependsOn:
-      - VisionOneEnrollmentStack
+    
 
   CloudTrailGetInfoStack:
+    DependsOn:
+      - CloudOneIntegrationStack
+      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         CloudOneApiKey: !Ref CloudOneApiKey
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3Prefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudtrail.template.yaml'
-    DependsOn:
-      - CloudOneIntegrationStack
+    
 
   CloudTrail:
     Type: AWS::CloudFormation::Stack
@@ -130,3 +156,173 @@ Resources:
         S3BucketName: !GetAtt CloudTrailGetInfoStack.Outputs.S3BucketName
         APIVersion: !GetAtt CloudTrailGetInfoStack.Outputs.APIVersion
       TemplateURL: !GetAtt CloudTrailGetInfoStack.Outputs.TemplateURL
+
+  # CopyZips
+  TrendStagingS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W35
+            reason: S3 access logs intentionally not enabled
+      checkov:
+        skip:
+          - id: CKV_AWS_18
+            comment: S3 access logs intentionally not enabled
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      Tags:
+        - Key: !Ref TrendSolutionTagKey
+          Value: !Ref TrendSolutionName
+      VersioningConfiguration:
+        Status: Enabled
+
+  rCopyZips:
+    Type: Custom::CopyZips
+    Properties:
+      ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
+      DestBucket: !Ref 'TrendStagingS3Bucket'
+      SourceBucket: !Ref 'QSS3BucketName'
+      Prefix: !Ref 'QSS3KeyPrefix'
+      Objects:
+        - lambda_functions/packages/sra-cloudtrail-org/lambda.zip
+        - lambda_functions/packages/sra-cloudtrail-prerequisites/lambda.zip
+        - templates/sra-cloudtrail-org/sra-cloudtrail-org-bucket.yaml
+        - templates/sra-cloudtrail-org/sra-cloudtrail-org-kms.yaml
+        - templates/sra-cloudtrail-org/sra-cloudtrail-org.yaml
+        - templates/sra-cloudtrail-org/sra-cloudtrail-org-main-ssm.yaml
+        - templates/sra-cloudtrail-org/sra-cloudtrail-org-main.yaml
+
+  rCopyZipsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Path: /
+      Policies:
+        - PolicyName: lambda-copier
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}/*'
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:PutObjectTagging
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/${QSS3KeyPrefix}/*'
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                Resource: '*'
+
+  rCopyZipsFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Copies objects from a source S3 bucket to a destination
+      Handler: index.handler
+      Runtime: python3.9
+      MemorySize: 128
+      Role: !GetAtt 'rCopyZipsRole.Arn'
+      Timeout: 240
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import threading
+          import boto3
+          import cfnresponse
+          def copy_objects(source_bucket, dest_bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              for o in objects:
+                  key = prefix + o
+                  copy_source = {
+                      'Bucket': source_bucket,
+                      'Key': key
+                  }
+                  print(('copy_source: %s' % copy_source))
+                  print(('dest_bucket = %s'%dest_bucket))
+                  print(('key = %s' %key))
+                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,
+                      Key=key)
+          def bucket_exists():
+              s3 = boto3.client('s3')
+              buckets = s3.list_buckets()
+              for bucket in buckets['Buckets']:
+                  return True
+          def delete_objects(bucket, prefix, objects):
+              s3 = boto3.client('s3')
+              if bucket_exists():
+                  objects = {'Objects': [{'Key': prefix + o} for o in objects]}
+                  s3.delete_objects(Bucket=bucket, Delete=objects)
+          def timeout(event, context):
+              logging.error('Execution is about to time out, sending failure response to CloudFormation')
+              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
+          def handler(event, context):
+              # make sure we send a failure to CloudFormation if the function
+              # is going to timeout
+              timer = threading.Timer((context.get_remaining_time_in_millis()
+                      / 1000.00) - 0.5, timeout, args=[event, context])
+              timer.start()
+              print(('Received event: %s' % json.dumps(event)))
+              status = cfnresponse.SUCCESS
+              try:
+                  source_bucket = event['ResourceProperties']['SourceBucket']
+                  dest_bucket = event['ResourceProperties']['DestBucket']
+                  prefix = event['ResourceProperties']['Prefix']
+                  objects = event['ResourceProperties']['Objects']
+                  if event['RequestType'] == 'Delete':
+                      delete_objects(dest_bucket, prefix, objects)
+                  else:
+                      copy_objects(source_bucket, dest_bucket, prefix, objects)
+              except Exception as e:
+                  logging.error('Exception: %s' % e, exc_info=True)
+                  status = cfnresponse.FAILED
+              finally:
+                  timer.cancel()
+                  cfnresponse.send(event, context, status, {}, None)

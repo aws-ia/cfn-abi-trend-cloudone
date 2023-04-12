@@ -6,6 +6,25 @@ Parameters:
     Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Deployment bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-abi-pilot
+    Description: S3 bucket name for the Deployment assets. Deployment bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-aws-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
   
 Resources:
   GetCloudOneRegionAndAccountFunction:
@@ -34,59 +53,14 @@ Resources:
       Architectures:
         - arm64
       Timeout: 60
-      Handler: index.lambda_handler
+      Handler: app.lambda_handler
       Role: !GetAtt GetCloudOneRegionAndAccountRole.Arn
       Environment:
         Variables:
           CloudOneApiKey: !Ref CloudOneApiKey
       Code:
-        ZipFile:
-          !Sub
-            |-
-              import json
-              import os
-              import urllib3
-              import boto3
-              import cfnresponse
-
-              def lambda_handler(event, context):
-                  status = cfnresponse.SUCCESS
-                  response_data = {}
-                  physicalResourceId = None
-                  try:
-                      
-                      if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-                        cloudOneApiKey = os.environ['CloudOneApiKey']
-                        apiKeyId = cloudOneApiKey.split(':')[0]
-
-                        url = 'https://accounts.cloudone.trendmicro.com/api/apikeys/' + apiKeyId
-
-                        headers = {
-                          'api-version': 'v1',
-                          'Authorization': 'ApiKey '+cloudOneApiKey+'',
-                          'Content-Type': 'application/json'
-                        }
-
-                        http = urllib3.PoolManager()
-                        print(url)
-                        response = http.request("GET", url=url, headers=headers)
-                        print(response)
-                        response_json_data = json.loads(response.data.decode("utf-8"))
-                        print(response_json_data)
-                        urn = response_json_data["urn"]
-                        region = urn.split(":")[3]
-                        accountId = urn.split(":")[4]
-                        physicalResourceId = response_json_data["urn"] 
-                        response_data = {"AccountId": accountId, "Region": region}
-
-                      else: # if event["RequestType"] == "Delete":
-                        physicalResourceId = event["PhysicalResourceId"]
-
-                  except Exception as e:
-                    print(e)
-                    status = cfnresponse.FAILED
-                  
-                  cfnresponse.send(event, context, status, response_data, physicalResourceId)
+        S3Bucket: !Ref 'TrendStagingS3Bucket'
+        S3Key: !Sub ${QSS3Prefix}/lambda_functions/packages/GetCloudOneRegionAndAccountFunction/lambda.zip
 
   GetCloudOneRegionAndAccount:
     Type: AWS::CloudFormation::CustomResource

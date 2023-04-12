@@ -22,7 +22,26 @@ Parameters:
        - de-1
   VisionOneServiceToken:
     Description: Vision One Service Token. See step 1 at https://docs.trendmicro.com/en-us/enterprise/trend-micro-xdr-help/ConfiguringCloudOneWorkloadSecurity/
-    Type: String  
+    Type: String
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Deployment bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-abi-pilot
+    Description: S3 bucket name for the Deployment assets. Deployment bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-aws-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
 
 Resources:
   VisionOneEnrollmentFunction:
@@ -51,7 +70,7 @@ Resources:
       Architectures:
         - arm64
       Timeout: 60
-      Handler: index.lambda_handler
+      Handler: app.lambda_handler
       Role: !GetAtt VisionOneEnrollmentFunctionRole.Arn
       Environment:
         Variables:
@@ -59,58 +78,8 @@ Resources:
           CloudOneApiKey: !Ref CloudOneApiKey
           VisionOneServiceToken: !Ref VisionOneServiceToken
       Code:
-        ZipFile:
-          !Sub
-            |-
-              import json
-              import os
-              import urllib3
-              import boto3
-              import cfnresponse
-
-              def lambda_handler(event, context):
-                  status = cfnresponse.SUCCESS
-                  response_data = {}
-                  physicalResourceId = None
-                  try:
-                      cloudOneRegion = os.environ['CloudOneRegion']
-                      cloudOneApiKey = os.environ['CloudOneApiKey']
-                      visionOneServiceToken = os.environ['VisionOneServiceToken']
-
-                      headers = {
-                        'api-version': 'v1',
-                        'Authorization': 'ApiKey '+cloudOneApiKey+'',
-                        'Content-Type': 'application/json'
-                      }
-
-                      http = urllib3.PoolManager()
-                      
-                      if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-                        
-
-                        url = 'https://visionone-connect.'+cloudOneRegion+'.cloudone.trendmicro.com/api/connectors'
-
-                        payload = json.dumps({
-                          'enrollmentToken': visionOneServiceToken
-                        })
-                      
-                        encoded_payload = payload.encode("utf-8")
-                        print(url)
-                        response = http.request("POST", url=url, headers=headers, body=encoded_payload)
-                        print(response)
-                        response_json_data = json.loads(response.data.decode("utf-8"))
-                        print(response_json_data)
-                        physicalResourceId = response_json_data["registration"]["status"] 
-                        response_data = {"ID": response_json_data["registration"]["status"]}
-
-                      else: # if event["RequestType"] == "Delete":
-                        physicalResourceId = event["PhysicalResourceId"]
-
-                  except Exception as e:
-                    print(e)
-                    status = cfnresponse.FAILED
-                  
-                  cfnresponse.send(event, context, status, response_data, physicalResourceId)
+        S3Bucket: !Ref 'TrendStagingS3Bucket'
+        S3Key: !Sub ${QSS3Prefix}/lambda_functions/packages/VisionOneEnrollmentFunction/lambda.zip
 
   VisionOneEnrollment:
     Type: AWS::CloudFormation::CustomResource
