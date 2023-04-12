@@ -130,7 +130,7 @@ Resources:
       Role: !GetAtt AWSConnectorLambdaFunctionRole.Arn
       Code:
         S3Bucket: !Ref 'TrendStagingS3Bucket'
-        S3Key: !Sub ${QSS3Prefix}/lambda_functions/packages/GetExternalIDLambda/lambda.zip
+        S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/GetExternalIDLambda/lambda.zip
 
 #Get External ID Custom Resource
   GetExternalID:
@@ -177,7 +177,7 @@ Resources:
           crossaccountrolearn: !GetAtt WorkloadSecurityRole.Arn
       Code:
         S3Bucket: !Ref 'TrendStagingS3Bucket'
-        S3Key: !Sub ${QSS3Prefix}/lambda_functions/packages/GetExternalIDLambda/lambda.zip
+        S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/GetExternalIDLambda/lambda.zip
 
 #Create AWS Connector Custom Resource
   AWSConnectorCreate:
