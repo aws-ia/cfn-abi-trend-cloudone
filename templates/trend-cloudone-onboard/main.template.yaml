@@ -77,6 +77,12 @@ Parameters:
       can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
       forward slash (/).
     Type: String
+  QSS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    ConstraintDescription: Region name must be a valid AWS region name.
+    Default: us-east-1
+    Description: Region name for the Deployment bucket.
+    Type: String
 
 Conditions:
   HasNoExistingCloudtrailBucketName:
@@ -89,7 +95,9 @@ Resources:
     Properties:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}get-cloudone-region-and-account.yaml'
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/get-cloudone-region-and-account.yaml'
 
   VisionOneEnrollmentStack:
     DependsOn: rCopyZips
@@ -100,8 +108,8 @@ Resources:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         VisionOneServiceToken: !Ref VisionOneServiceToken
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3Prefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}vision-one-enrollment.template.yaml'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-enrollment.template.yaml'
 
   WorkloadSecurityIntegrationStack:
     DependsOn:
@@ -113,8 +121,8 @@ Resources:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3Prefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}workloadsecurity.template.yaml'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/workloadsecurity.template.yaml'
     
 
   CloudOneIntegrationStack:
@@ -128,8 +136,8 @@ Resources:
         CloudOneAccountID: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneAccountId
         CloudOneApiKey: !Ref CloudOneApiKey
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3Prefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudone.template.yaml'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/cloudone.template.yaml'
     
 
   CloudTrailGetInfoStack:
@@ -142,8 +150,8 @@ Resources:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         CloudOneApiKey: !Ref CloudOneApiKey
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3Prefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}cloudtrail.template.yaml'
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/cloudtrail.template.yaml'
     
 
   CloudTrail:
@@ -196,15 +204,15 @@ Resources:
       ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
       DestBucket: !Ref 'TrendStagingS3Bucket'
       SourceBucket: !Ref 'QSS3BucketName'
-      Prefix: !Ref 'QSS3KeyPrefix'
+      Prefix: !Sub '${QSS3KeyPrefix}/'
       Objects:
-        - lambda_functions/packages/sra-cloudtrail-org/lambda.zip
-        - lambda_functions/packages/sra-cloudtrail-prerequisites/lambda.zip
-        - templates/sra-cloudtrail-org/sra-cloudtrail-org-bucket.yaml
-        - templates/sra-cloudtrail-org/sra-cloudtrail-org-kms.yaml
-        - templates/sra-cloudtrail-org/sra-cloudtrail-org.yaml
-        - templates/sra-cloudtrail-org/sra-cloudtrail-org-main-ssm.yaml
-        - templates/sra-cloudtrail-org/sra-cloudtrail-org-main.yaml
+        - lambda_functions/packages/AddAWSAccountToCloudOneFunction/lambda.zip
+        - lambda_functions/packages/AWSConnectorCreateLambda/lambda.zip
+        - lambda_functions/packages/GetCloudOneRegionAndAccountFunction/lambda.zip
+        - lambda_functions/packages/GetCloudTrailStackParametersFunction/lambda.zip
+        - lambda_functions/packages/GetExternalIDLambda/lambda.zip
+        - lambda_functions/packages/VisionOneEnrollmentFunction/lambda.zip
+
 
   rCopyZipsRole:
     Type: AWS::IAM::Role

@@ -1,7 +1,7 @@
 project:
   name: cfn-abi-trend-cloudone
   owner: raphael_bottino@trendmicro.com #We need a DL for this.
-  package_lambda: false
+  package_lambda: true
   shorten_stack_name: true
   regions:
   - ap-northeast-1
@@ -21,7 +21,7 @@ tests:
       CloudOneApiKey: $[taskcat_secrets_get_CloudOneApiKey]
       VisionOneServiceToken: $[taskcat_secrets_get_VisionOneServiceToken]
       QSS3BucketName: $[taskcat_autobucket]
-      QSS3KeyPrefix: "cfn-abi-trend-cloudone/templates/trend-cloudone-onboard/"
+      QSS3KeyPrefix: $[taskcat_project_name]
     regions:
     - us-east-1
     template: templates/trend-cloudone-onboard/main.template.yaml
