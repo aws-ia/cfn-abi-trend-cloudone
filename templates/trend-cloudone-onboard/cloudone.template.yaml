@@ -51,6 +51,8 @@ Resources:
         CloudOneRegion: !Ref CloudOneRegion
         CloudOneAccountID: !Ref CloudOneAccountID
         CloudOneOIDCProviderURL: !Sub 'cloudaccounts.${CloudOneRegion}.cloudone.trendmicro.com'
+      # This CloudFormation template is not available in the public repository. Instead, it is available in a Product-maintaned S3 bucket. 
+      # Soon we'll implement a mechanism to automatically download the template from the S3 bucket if a change is detected.
       TemplateURL: !Sub 'https://cloud-one-cloud-accounts-${AWS::Region}.s3.${AWS::Region}.amazonaws.com/templates/aws/cloud-account-management-role.template'
 
   AddAWSAccountToCloudOneFunction:

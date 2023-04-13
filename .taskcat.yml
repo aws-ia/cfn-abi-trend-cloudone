@@ -15,9 +15,8 @@ project:
   - us-west-1
   - us-west-2
 tests:
-  sample:
+  t1:
     parameters:
-      # Examples: of other taskcat dynamic input parameters for more into see http://taskcat.io
       CloudOneApiKey: $[taskcat_secrets_get_CloudOneApiKey]
       VisionOneServiceToken: $[taskcat_secrets_get_VisionOneServiceToken]
       QSS3BucketName: $[taskcat_autobucket]
