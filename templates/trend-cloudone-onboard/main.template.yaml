@@ -41,6 +41,13 @@ Parameters:
     Description: Tag Key to be used for Trend Cloud One resources
     Type: String
     Default: 'Trend Cloud One'
+  ExistingCloudtrailBucketName:
+    Description: Optional. If left empty, the first existing Organizational Trail will be 
+      selected and its bucket will be used as source for this integration. If you specify 
+      a bucket that already has a Organizational Trail, that bucket will be used for this 
+      integration.
+    Type: String
+    Default: ""
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -66,6 +73,10 @@ Parameters:
     Default: us-east-1
     Description: Region name for the Deployment bucket.
     Type: String
+
+Conditions:
+  FindCloudtrailBucketName:
+    !Equals [!Ref ExistingCloudtrailBucketName, ""]
 
 Resources:
   GetCloudOneRegionAndAccountStack:
@@ -140,7 +151,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        ExistingCloudtrailBucketName: GetOrgTrailBucketStack.Outputs.BucketName
+        ExistingCloudtrailBucketName: !If [FindCloudtrailBucketName, !GetAtt GetOrgTrailBucketStack.Outputs.OrganizationalTrailBucketName, !Ref ExistingCloudtrailBucketName]
         ServiceToken: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceToken
         ServiceURL: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceURL
         S3BucketName: !GetAtt CloudTrailGetInfoStack.Outputs.S3BucketName
@@ -149,6 +160,7 @@ Resources:
 
   # Resources for fetching the Organizational Trail's bucket
   GetOrgTrailBucketStack:
+    Condition: FindCloudtrailBucketName
     DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
