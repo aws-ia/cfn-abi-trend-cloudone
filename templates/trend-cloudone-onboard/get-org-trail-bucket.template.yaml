@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Get the AWS Organization CloudTrail Bucket
+
+Parameters:
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Deployment bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-abi-pilot
+    Description: S3 bucket name for the Deployment assets. Deployment bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-aws-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
+
+Resources:
+    GetOrganizationalTrailBucketNameFunction:
+      Metadata:
+          cfn_nag:
+            rules_to_suppress:
+              - id: W58
+                reason: Lambda role provides access to CloudWatch Logs
+              - id: W89
+                reason: Lambda does not need to communicate with VPC resources.
+              - id: W92
+                reason: Lambda does not need reserved concurrent executions.
+          checkov:
+            skip:
+              - id: CKV_AWS_115
+                comment: Lambda does not need reserved concurrent executions.
+              - id: CKV_AWS_116
+                comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+              - id: CKV_AWS_117
+                comment: Lambda does not need to communicate with VPC resources.
+              - id: CKV_AWS_173
+                comment: Environment variables are not sensitive.
+      Type: AWS::Lambda::Function
+      Properties:
+          Runtime: python3.9
+          Architectures:
+              - arm64
+          Timeout: 60
+          Handler: app.lambda_handler
+          Role: !GetAtt GetOrganizationalTrailBucketNameRole.Arn
+          Code:
+              S3Bucket: !Ref 'TrendStagingS3Bucket'
+              S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/GetOrganizationalTrailBucketName/lambda.zip
+
+    GetOrganizationalTrailBucketName:
+        Type: Custom::GetOrganizationalTrailBucketName
+        Properties:
+            ServiceToken: !GetAtt GetOrganizationalTrailBucketNameFunction.Arn
+
+    GetOrganizationalTrailBucketNameRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+        Path: "/"
+        ManagedPolicyArns:
+          - Fn::Join:
+              - ""
+              - - "arn:"
+                - Ref: AWS::Partition
+                - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        Policies:
+            - PolicyName: GetOrganizationalTrailBucketNamePolicy
+              PolicyDocument:
+                  Version: 2012-10-17
+                  Statement:
+                      - Effect: Allow
+                        Action:
+                            - cloudtrail:DescribeTrails
+                        Resource: '*'
+
+Outputs:
+    OrganizationalTrailBucketName:
+        Description: The name of the S3 bucket where CloudTrail logs are stored
+        Value: !GetAtt GetOrganizationalTrailBucketName.BucketName
+
+    OrganizationalTrailName:
+        Description: The name of the CloudTrail trail
+        Value: !GetAtt GetOrganizationalTrailBucketName.TrailName
