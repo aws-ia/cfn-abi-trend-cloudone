@@ -11,6 +11,7 @@ Metadata:
       - VisionOneServiceToken
       - TrendSolutionTagKey
       - TrendSolutionName
+      - ExistingCloudtrailBucketName
     - Label:
         default: 'Warning: Do not modify the fields below unless you know what you
          are doing. Modifications may cause your deployment to fail.'
