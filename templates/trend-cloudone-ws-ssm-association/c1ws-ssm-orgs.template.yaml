@@ -39,12 +39,10 @@ Parameters:
   dsActivationUrl:
     Type: String
     Description: "Cloud One Workload Security Activation URL."
-    NoEcho: true
     Default: ''
   dsManagerUrl:
     Type: String
     Description: "Cloud One Workload Security Manager URL."
-    NoEcho: true
     Default: ''
   dsTenantId:
     Type: String

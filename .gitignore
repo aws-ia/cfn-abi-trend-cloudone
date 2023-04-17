@@ -160,3 +160,18 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+# taskcat
+taskcat_outputs/
+.taskcat/
+.taskcat.secrets.yml
+# since the zips are automatically generated, we don't want to check them in
+lambda_functions/packages/
+
+# General
+.DS_Store
+
+# Ash
+aggregated_results.txt
+
+# Taskcat secrets
+taskcat-secrets.yml
