@@ -174,4 +174,4 @@ lambda_functions/packages/
 aggregated_results.txt
 
 # Taskcat secrets
-taskcat-secrets.yml
+.taskcat-secrets.yml
