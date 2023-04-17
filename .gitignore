@@ -163,7 +163,7 @@ cython_debug/
 # taskcat
 taskcat_outputs/
 .taskcat/
-.taskcat-secrets.yml
+*.taskcat-secrets.yml*
 
 # since the zips are automatically generated, we don't want to check them in
 lambda_functions/packages/
