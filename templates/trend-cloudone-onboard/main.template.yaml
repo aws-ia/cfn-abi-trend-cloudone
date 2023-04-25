@@ -8,7 +8,8 @@ Metadata:
         default: 'Please adjust the fields below as required for deployment.'
       Parameters:
       - CloudOneApiKey
-      - VisionOneServiceToken
+      - VisionOneAuthenticationToken
+      - VisionOneRegion
       - TrendSolutionTagKey
       - TrendSolutionName
       - ExistingCloudtrailBucketName
@@ -21,19 +22,27 @@ Metadata:
     ParameterLabels:
       CloudOneApiKey:
         default: CloudOneApiKey
-      VisionOneServiceToken:
-        default: VisionOneServiceToken
-    
 
 Parameters:
   CloudOneApiKey:
     Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
-  VisionOneServiceToken:
-    Description: Vision One Service Token. See step 1 at https://docs.trendmicro.com/en-us/enterprise/trend-micro-xdr-help/ConfiguringCloudOneWorkloadSecurity/
+  VisionOneAuthenticationToken:
+    Description: Vision One Authentication Token. See https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
     Type: String
     NoEcho: true
+  VisionOneRegion:
+    Description: Vision One Region. See https://automation.trendmicro.com/xdr/Guides/Regional-Domains
+    Type: String
+    Default: "United States"
+    AllowedValues:
+      - "Australia"
+      - "European Union"
+      - "India"
+      - "Japan"
+      - "Singapore"
+      - "United States"
   TrendSolutionTagKey:
     Description: Tag Key to be used for Trend Cloud One resources
     Type: String
@@ -89,6 +98,17 @@ Resources:
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/get-cloudone-region-and-account.yaml'
+  
+  GenerateVisionOneServiceTokenStack:
+    DependsOn: rCopyZips
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        VisionOneAuthenticationToken: !Ref VisionOneAuthenticationToken
+        VisionOneRegion: !Ref VisionOneRegion
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-generate-enrollment-token.yaml'
 
   VisionOneEnrollmentStack:
     DependsOn: rCopyZips
@@ -97,7 +117,7 @@ Resources:
       Parameters:
         CloudOneApiKey: !Ref CloudOneApiKey
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
-        VisionOneServiceToken: !Ref VisionOneServiceToken
+        VisionOneServiceToken: !GetAtt GenerateVisionOneServiceTokenStack.Outputs.VisionOneEnrollmentToken
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-enrollment.template.yaml'
