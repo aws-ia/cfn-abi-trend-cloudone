@@ -7,7 +7,6 @@ PROJECT_TYPE_PATH=${BASE_PATH}/projecttype
 
 cd ${PROJECT_PATH}
 
-
 taskcat upload --bucket-name aws-abi-pilot --object-acl public-read
 
 # if [ -n "${BASE_PATH}" ]
@@ -17,3 +16,4 @@ taskcat upload --bucket-name aws-abi-pilot --object-acl public-read
 # else
 #   echo "Local build mode (skipping publication)"
 # fi
+
