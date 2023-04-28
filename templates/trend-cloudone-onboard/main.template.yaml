@@ -166,7 +166,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        ExistingCloudtrailBucketName: ExistingOrganizationalCloudtrailBucketName
+        ExistingCloudtrailBucketName: !Ref ExistingOrganizationalCloudtrailBucketName
         ServiceToken: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceToken
         ServiceURL: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceURL
         S3BucketName: !GetAtt CloudTrailGetInfoStack.Outputs.S3BucketName
