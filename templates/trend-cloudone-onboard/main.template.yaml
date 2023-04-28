@@ -52,11 +52,11 @@ Parameters:
     Type: String
     Default: 'Trend Cloud One'
   ExistingOrganizationalCloudtrailBucketName:
-    Description: Optional. If left empty, a new Organizational Trail will be created and 
-      used as source for this integration. If you specify a bucket that already has a 
-      Organizational Trail, that bucket will be used for this integration.
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Description: Bucket name of an existing Organizational CloudTrail. If you do not
+      have an existing Organizational CloudTrail, please create one before deploying.
     Type: String
-    Default: ""
+    MinLength: "3"
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -82,10 +82,6 @@ Parameters:
     Default: us-east-1
     Description: Region name for the Deployment bucket.
     Type: String
-
-Conditions:
-  CreateNewOrganizationalTrail:
-    !Equals [!Ref ExistingOrganizationalCloudtrailBucketName, ""]
 
 Resources:
   GetCloudOneRegionAndAccountStack:
@@ -134,7 +130,6 @@ Resources:
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/workloadsecurity.template.yaml'
     
-
   CloudOneIntegrationStack:
     DependsOn:
       - VisionOneEnrollmentStack
@@ -171,21 +166,12 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        ExistingCloudtrailBucketName: !If [CreateNewOrganizationalTrail, !GetAtt CloudTrailAbi.Outputs.oOrganizationCloudTrailS3BucketName, !Ref ExistingOrganizationalCloudtrailBucketName]
+        ExistingCloudtrailBucketName: ExistingOrganizationalCloudtrailBucketName
         ServiceToken: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceToken
         ServiceURL: !GetAtt CloudTrailGetInfoStack.Outputs.ServiceURL
         S3BucketName: !GetAtt CloudTrailGetInfoStack.Outputs.S3BucketName
         APIVersion: !GetAtt CloudTrailGetInfoStack.Outputs.APIVersion
       TemplateURL: !GetAtt CloudTrailGetInfoStack.Outputs.TemplateURL
-
-  # Calling CloudTrail ABI to create a new organization trail
-  CloudTrailAbi:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        pSRAS3BucketRegion: !Ref QSS3BucketRegion
-        pEnableDataEventsOnly: 'false'
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/submodules/cfn-abi-aws-cloudtrail/templates/sra-cloudtrail-enable-in-org-ssm.yaml'
 
   # CopyZips Resources
   TrendStagingS3Bucket:
