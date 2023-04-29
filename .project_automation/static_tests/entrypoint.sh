@@ -9,3 +9,4 @@ cd ${PROJECT_PATH}
 
 find templates -name *.yaml -o -name *.yml -o -name *.json | xargs cfn-lint
 taskcat lint
+
