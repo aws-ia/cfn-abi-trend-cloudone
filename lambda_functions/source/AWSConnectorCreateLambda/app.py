@@ -11,14 +11,12 @@ import cfnresponse
 import os
 
 def lambda_handler(event, context):
-    print(event)
     
     status = cfnresponse.SUCCESS
     response_data = {}
     physicalResourceId = None
 
     accountId = os.environ['awsaccountid']
-    externalId = os.environ['externalid']
     crossAccountRoleArn = os.environ['crossaccountrolearn']
     cloudOneApiKey = event['ResourceProperties']['CloudOneApiKey']
     cloudOneRegion = event['ResourceProperties']['CloudOneRegion']

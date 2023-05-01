@@ -167,6 +167,7 @@ cython_debug/
 taskcat_outputs/
 taskcat_outputs
 .taskcat
+.taskcat.secrets.yml
 
 # ASH tool files
 aggregated_results.txt
