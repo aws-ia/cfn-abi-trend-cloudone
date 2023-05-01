@@ -1,8 +1,13 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet Root. "
+Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet. Main Root Stack."
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
+      - 
+        Label:
+          default: 'AccountAdminStatus'
+        Parameters:
+          - AccountAdminStatus
       - 
         Label:
           default: 'Targets'
@@ -54,6 +59,13 @@ Parameters:
     Description: "Cloud One Workload Security Token ID."
     NoEcho: true
     Default: ''
+  AccountAdminStatus:
+    Type:  String
+    Description: "Are you running this stack in delegated admin or directly on management account."
+    AllowedValues:
+      - "SELF"
+      - "DELEGATED_ADMIN"
+    Default: "SELF"
 
 Resources:
   SSMStackSet:
@@ -63,6 +75,7 @@ Resources:
           Enabled: true
           RetainStacksOnAccountRemoval: false
       CallAs: SELF
+      CallAs: !!Ref AccountAdminStatus
       Capabilities:
           - CAPABILITY_AUTO_EXPAND
           - CAPABILITY_IAM
