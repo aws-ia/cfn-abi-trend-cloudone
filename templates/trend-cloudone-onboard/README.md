@@ -1,6 +1,10 @@
-# Add AWS Account to Cloud One
+# Add AWS Account to Cloud One and Enable CloudTrail Analyzes
 
-To fully integrate an AWS account in Cloud One, you must deploy resources in your AWS account and do manual steps in Trend Cloud One dashboard. This CloudFormation template automates all these steps on your behalf, including integrating it to Vision One.
+To fully integrate an AWS account in Cloud One, you must deploy resources in your AWS account and do manual steps in Trend Cloud One dashboard. This CloudFormation template automates all these steps on your behalf, including enabling the CloudTrail integration and connecting it to your Vision One tenant. Once it's working, you will start to receive alerts on any CloudTrail events that trigger a detection model in the Workbench App in Vision One - (XDR Threat Investigation > Workbench). This helps your organization to quickly detect suspicious malicious behavior on their AWS account and enable its Security and Cloud Operation teams to respond quickly to security events.
+
+## CloudTrail Integration Architecture
+
+![CloudTrail Integration Architecture](../../images/cloudtrail-integration.png)
 
 ## What does it actually do?
 
