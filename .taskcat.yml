@@ -1,13 +1,23 @@
 project:
-  name: cfn-abi-trend-cloudone-ws-ssm-deployment
-  owner: justin_perkins@trendmicro.com
-  package_lambda: false
+  name: cfn-abi-trend-cloudone
+  owner: raphael_bottino@trendmicro.com #We need a DL for this.
+  package_lambda: true
   shorten_stack_name: true
   regions:
   - us-east-1
 
 tests:
-  examination1:
+  t1:
+    parameters:
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
+    regions:
+    - us-east-1
+    template: templates/trend-cloudone-onboard/main.template.yaml
+  ws-ssm-deployment:
     parameters:
       DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
       dsActivationUrl: $[taskcat_ssm_/trend/activation_url]
@@ -18,4 +28,3 @@ tests:
     regions:
     - us-east-1
     template: templates/trend-cloudone-ws-ssm-association/c1ws-ssm-orgs.template.yaml
-
