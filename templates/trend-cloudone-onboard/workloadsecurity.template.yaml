@@ -24,6 +24,11 @@ Parameters:
   TrendKey:
     Description: KMS Key Arn used to encrypt all Trend secrets.
     Type: String
+  TrendWorkloadSecurityAWSAccountId:
+    Description: AWS Account ID for the AWS account where Trend Workload Security is hosted.
+      Most likely, you don't need to edit this parameter's default.
+    Type: String
+    Default: "147995105371"
   TrendStagingS3Bucket:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -53,7 +58,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: arn:aws:iam::147995105371:root
+              AWS: !Sub "arn:${AWS::Partition}:iam::${TrendWorkloadSecurityAWSAccountId}:root"
             Action:
               - 'sts:AssumeRole'
             Condition:
