@@ -2,10 +2,14 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Get Trend Cloud One region and account id given an API Key.
 
 Parameters:
-  CloudOneApiKey:
-    Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+  CloudOneApiKeySecret:
+    Description: Arn of the Cloud One API Key Secret. You can learn more about it 
+      at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
+  TrendKey:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
   TrendStagingS3Bucket:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -57,7 +61,7 @@ Resources:
       Role: !GetAtt GetCloudOneRegionAndAccountRole.Arn
       Environment:
         Variables:
-          CloudOneApiKey: !Ref CloudOneApiKey
+          CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
       Code:
         S3Bucket: !Ref 'TrendStagingS3Bucket'
         S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/GetCloudOneRegionAndAccountFunction/lambda.zip
@@ -81,11 +85,23 @@ Resources:
             - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "${CloudOneApiKeySecret}*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource:
+                  - !Ref TrendKey
+          PolicyName: CloudOneApiKeySecretDecryptPolicy
+
   
 Outputs:
   CloudOneAccountId:

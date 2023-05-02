@@ -2,8 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Trend Vision One Generate and Delete Enrollment Token.
 
 Parameters:
-  VisionOneAuthenticationToken:
-    Description: Vision One Authentication Token. See https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
+  VisionOneAuthenticationTokenSecret:
+    Description: Arn for Vision One Authentication Token Secret. See 
+      https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
     Type: String
   VisionOneRegion:
     Description: Vision One Region. See https://automation.trendmicro.com/xdr/Guides/Regional-Domains
@@ -16,6 +17,9 @@ Parameters:
       - "Japan"
       - "Singapore"
       - "United States"
+  TrendKey:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
   TrendStagingS3Bucket:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -67,7 +71,7 @@ Resources:
       Role: !GetAtt VisionOneGenerateEnrollmentTokenFunctionRole.Arn
       Environment:
         Variables:
-          VisionOneAuthenticationToken: !Ref VisionOneAuthenticationToken
+          VisionOneAuthenticationTokenSecret: !Ref VisionOneAuthenticationTokenSecret
           VisionOneRegion: !Ref VisionOneRegion
       Code:
         S3Bucket: !Ref 'TrendStagingS3Bucket'
@@ -93,6 +97,21 @@ Resources:
       Path: "/"
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "${VisionOneAuthenticationTokenSecret}*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource:
+                  - !Ref TrendKey
+          PolicyName: VisionOneGenerateEnrollmentTokenFunctionRolePolicy
 
 Outputs:
   VisionOneEnrollmentToken:

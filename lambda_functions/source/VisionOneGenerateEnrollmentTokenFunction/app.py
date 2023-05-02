@@ -9,6 +9,7 @@ import json
 import os
 import urllib3
 import cfnresponse
+import boto3
 
 def define_endpoint(region):
     if region == "Australia":
@@ -30,7 +31,8 @@ def lambda_handler(event, context):
     response_data = {}
     physicalResourceId = None
     try:
-        visionOneAuthenticationToken = os.environ['VisionOneAuthenticationToken']
+        sm = boto3.client('secretsmanager')
+        visionOneAuthenticationToken = sm.get_secret_value(SecretId=os.environ['VisionOneAuthenticationTokenSecret'])['SecretString']
         visionOneRegion = os.environ['VisionOneRegion']
 
         headers = {

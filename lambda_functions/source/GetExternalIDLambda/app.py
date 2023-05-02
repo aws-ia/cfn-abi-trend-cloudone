@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT-0
 import json
 import urllib3
 import cfnresponse
+import boto3
 
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
@@ -16,7 +17,8 @@ def lambda_handler(event, context):
     try:
         
         if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-            cloudOneApiKey = event['ResourceProperties']['CloudOneApiKey']
+            sm = boto3.client('secretsmanager')
+            cloudOneApiKey = sm.get_secret_value(SecretId=event['ResourceProperties']['CloudOneApiKeySecret'])['SecretString']
             cloudOneRegion = event['ResourceProperties']['CloudOneRegion']
 
             url = 'https://workload.'+cloudOneRegion+'.cloudone.trendmicro.com/api/awsconnectorsettings'

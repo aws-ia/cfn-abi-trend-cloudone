@@ -21,6 +21,7 @@ tests:
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
+      ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
     regions:
     - us-east-1
     template: templates/trend-cloudone-onboard/main.template.yaml

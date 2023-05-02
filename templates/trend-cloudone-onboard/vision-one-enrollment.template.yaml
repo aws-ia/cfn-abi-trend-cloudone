@@ -2,8 +2,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Trend Cloud One Workload Security Integration.
 
 Parameters:
-  CloudOneApiKey:
-    Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+  CloudOneApiKeySecret:
+    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
+      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
   CloudOneRegion:
@@ -20,6 +21,9 @@ Parameters:
        - jp-1
        - ca-1
        - de-1
+  TrendKey:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
   VisionOneServiceToken:
     Description: Vision One Service Token. See step 1 at https://docs.trendmicro.com/en-us/enterprise/trend-micro-xdr-help/ConfiguringCloudOneWorkloadSecurity/
     Type: String
@@ -76,7 +80,7 @@ Resources:
       Environment:
         Variables:
           CloudOneRegion: !Ref CloudOneRegion
-          CloudOneApiKey: !Ref CloudOneApiKey
+          CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
           VisionOneServiceToken: !Ref VisionOneServiceToken
       Code:
         S3Bucket: !Ref 'TrendStagingS3Bucket'
@@ -101,9 +105,19 @@ Resources:
             - sts:AssumeRole
       Path: "/"
       ManagedPolicyArns:
-        - Fn::Join:
-            - ""
-            - - "arn:"
-              - Ref: AWS::Partition
-              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "${CloudOneApiKeySecret}*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource:
+                  - !Ref TrendKey
+          PolicyName: CloudOneApiKeySecretDecryptPolicy

@@ -12,6 +12,7 @@ import uuid
 from urllib.parse import unquote
 import urllib3
 import cfnresponse
+import boto3
 
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
@@ -21,7 +22,8 @@ def lambda_handler(event, context):
         
         if event["RequestType"] == "Create" or event["RequestType"] == "Update":
             cloudOneRegion = os.environ['CloudOneRegion']
-            cloudOneApiKey = os.environ['CloudOneApiKey']
+            sm = boto3.client('secretsmanager')
+            cloudOneApiKey = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
             awsAccountId = os.environ['AwsAccountId']
             awsRegion = os.environ['AwsRegion']
 

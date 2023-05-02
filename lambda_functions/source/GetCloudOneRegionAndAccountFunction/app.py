@@ -9,6 +9,7 @@ import json
 import os
 import urllib3
 import cfnresponse
+import boto3
 
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
@@ -17,7 +18,8 @@ def lambda_handler(event, context):
     try:
         
         if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-            cloudOneApiKey = os.environ['CloudOneApiKey']
+            sm = boto3.client('secretsmanager')
+            cloudOneApiKey = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
             apiKeyId = cloudOneApiKey.split(':')[0]
 
             url = 'https://accounts.cloudone.trendmicro.com/api/apikeys/' + apiKeyId

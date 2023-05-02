@@ -9,6 +9,7 @@ import json
 import os
 import urllib3
 import cfnresponse
+import boto3
 
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
@@ -16,7 +17,8 @@ def lambda_handler(event, context):
     physicalResourceId = None
     try:
         cloudOneRegion = os.environ['CloudOneRegion']
-        cloudOneApiKey = os.environ['CloudOneApiKey']
+        sm = boto3.client('secretsmanager')
+        cloudOneApiKey = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
         visionOneServiceToken = os.environ['VisionOneServiceToken']
 
         headers = {

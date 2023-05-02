@@ -9,6 +9,7 @@ import json
 import urllib3
 import cfnresponse
 import os
+import boto3
 
 def lambda_handler(event, context):
     
@@ -18,7 +19,8 @@ def lambda_handler(event, context):
 
     accountId = os.environ['awsaccountid']
     crossAccountRoleArn = os.environ['crossaccountrolearn']
-    cloudOneApiKey = event['ResourceProperties']['CloudOneApiKey']
+    sm = boto3.client('secretsmanager')
+    cloudOneApiKey = sm.get_secret_value(SecretId=event['ResourceProperties']['CloudOneApiKeySecret'])['SecretString']
     cloudOneRegion = event['ResourceProperties']['CloudOneRegion']
 
     headers = {
