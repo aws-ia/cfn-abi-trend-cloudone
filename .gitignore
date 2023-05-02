@@ -161,16 +161,15 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+# taskcat
+taskcat_outputs/
+.taskcat/
+
+# since the zips are automatically generated, we don't want to check them in
+lambda_functions/packages/
+
+# General
 .DS_Store
 
-# Taskcat files
-taskcat_outputs/
-taskcat_outputs
-.taskcat
-.taskcat.secrets.yml
-
-# ASH tool files
+# Ash
 aggregated_results.txt
-
-# Package files
-lambda.zip
