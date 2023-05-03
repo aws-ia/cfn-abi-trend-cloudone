@@ -7,8 +7,23 @@ project:
   - us-east-1
 
 tests:
-  t1:
+  all-false: # No integration, only common resources.
     parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
+      
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
+  t1: # CloudTrail integration only.
+    parameters:
+      DeployCloudTrailIntegration: "True"
+      DeploySSMIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
@@ -16,9 +31,11 @@ tests:
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
     regions:
     - us-east-1
-    template: templates/trend-cloudone-onboard/main.template.yaml
+    template: templates/main.template.yaml
   ws-ssm-deployment:
     parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "True"
       DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
       dsActivationUrl: $[taskcat_ssm_/trend/activation_url]
       dsManagerUrl: $[taskcat_ssm_/trend/manager_url]
