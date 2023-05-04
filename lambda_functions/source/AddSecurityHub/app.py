@@ -5,8 +5,8 @@ import json
 import time
 
 # Cloud One API Key
-cloud_one_api_key = os.environ['cloud_one_api_key']
-cloud_one_region = os.environ['cloud_one_region']
+cloud_one_api_key = os.environ['CloudOneApiKey']
+cloud_one_region = os.environ['CloudOneRegion']
 
 
 
