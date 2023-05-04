@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet. Main Root Stack."
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          default: 'AccountAdminStatus'
+        Parameters:
+          - AccountAdminStatus
+      - 
+        Label:
+          default: 'Targets'
+        Parameters:
+          - CronJob
+      - 
+        Label:
+          default: 'Trend Cloud One'
+        Parameters:
+          - CloudOneRegionEndpoint
+          - CloudOneAPIKey
+Parameters:
+  CronJob:
+    Type: String
+    Description: Specify the CRON Job for future scheduling. [Default is everyday @10:15AM - cron(15 10 * * ? *)]
+    Default: 'cron(15 10 * * ? *)'
+  CloudOneRegionEndpoint:
+    Type: String
+    Description: Enter your Cloud One Account Region Endpoint (US-1)
+  CloudOneAPIKey:
+    Type: String
+    NoEcho: true
+    Description: Enter your Cloud One API Key
+    Default: ""
+  AccountAdminStatus:
+    Type:  String
+    Description: "Are you running this stack in delegated admin[DELEGATED_ADMIN] or directly on management account[SELF]."
+    AllowedValues:
+      - "SELF"
+      - "DELEGATED_ADMIN"
+    Default: "SELF"
+
+Resources:
+  GetWorkloadSecurityAgentDeploymentParameters:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        CloudOneWSAPIEndpoint: !Ref CloudOneRegionEndpoint
+        CloudOneAPIKey: !Ref CloudOneAPIKey
+      TemplateURL: https://immersionday-workshops-trendmicro.s3.amazonaws.com/abi/AgentDeploymentScriptParse.template.yaml
+  
+  SSMAssociationforWorkloadAgent:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AccountAdminStatus: !Ref AccountAdminStatus
+        DeploymentTargets: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.OrgOUs
+        TargetKey: 'InstanceIds'
+        TargetValues: '*'
+        CronJob: !Ref CronJob
+        dsActivationUrl: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.ActivationURL
+        dsManagerUrl: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.ManagerURL
+        dsTenantId: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.TenantID
+        dsToken: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.Token
+      TemplateURL: https://immersionday-workshops-trendmicro.s3.amazonaws.com/abi/c1ws-ssm-orgs.template.yaml
+
+        
