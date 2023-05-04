@@ -16,6 +16,7 @@ Metadata:
       Parameters:
         - DeployCloudTrailIntegration
         - DeploySSMIntegration
+        - DeploySecurityHubIntegration
     - Label:
         default: 'Parameters for CloudTrail integration. Please adjust the fields below 
           as required for deployment.'
@@ -71,6 +72,13 @@ Parameters:
       - "False"
   DeploySSMIntegration:
     Description: Deploy SSM integration
+    Type: String
+    Default: "False"
+    AllowedValues:
+      - "True"
+      - "False"
+  DeploySecurityHubIntegration:
+    Description: Deploy Security Hub integration
     Type: String
     Default: "False"
     AllowedValues:
@@ -173,6 +181,7 @@ Parameters:
 Conditions:
   DeployCloudTrailIntegration: !Equals [!Ref DeployCloudTrailIntegration, "True"]
   DeploySSMIntegration: !Equals [!Ref DeploySSMIntegration, "True"]
+  DeploySecurityHubIntegration: !Equals [!Ref DeploySecurityHubIntegration, "True"]
 
 Resources:
   CloudTrailIntegration:
