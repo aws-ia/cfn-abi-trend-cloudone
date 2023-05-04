@@ -28,24 +28,15 @@ Metadata:
         default: 'Parameters for SSM integration. Please adjust the fields below as
           required for deployment.'
       Parameters:
-        - AccountAdminStatus
-        - DeploymentTargets
-        - TargetKey
-        - TargetValues
         - CronJob
-        - dsActivationUrl
-        - dsManagerUrl
-        - dsTenantId
-        - dsToken
+        - AccountAdminStatus
+  AccountAdminStatus:
     - Label:
         default: 'Warning: Do not modify the fields below unless you know what you
          are doing. Modifications may cause your deployment to fail.'
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
-    ParameterLabels:
-      CloudOneApiKey:
-        default: CloudOneApiKey
 
 Parameters:
   # Common Parameters
@@ -109,40 +100,10 @@ Parameters:
     MinLength: "3"
 
   # SSM Integration Parameters
-  DeploymentTargets:
-    Description: Specify AWS Organizational Unit IDs within AWS Organization whose accounts have the target instances (ou-name) for distribution. (Account IDs are only allowed when updating)
-    Type: CommaDelimitedList
-    Default: ''
-  TargetKey:
-    Type: String
-    Description: Specify which instances have to be targeted for this solution. Allowed values - ParameterValues, ResourceGroup or begin with tag:, AWS::EC2::Instance, InstanceIds (default), instanceids. Refer https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_Target.html for more details.
-    Default: 'InstanceIds'
-  TargetValues:
-    Type: String
-    Description: Specify the values of the target keys specified above. Default is *, which targets all instances. Refer https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_Target.html for more details.
-    Default: '*'
   CronJob:
     Type: String
     Description: Specify the CRON Job for future scheduling. [Default is everyday @10:15AM - cron(15 10 * * ? *)]
     Default: 'cron(15 10 * * ? *)'
-  dsActivationUrl:
-    Type: String
-    Description: "Enter the Cloud One Workload Security Activation URL.(On the Workload Security console, go to Support > Deployment Scripts. Go to the top of the generated script and copy the dsActivationUrl.)"
-    AllowedPattern: '^dsm://agents\.(deepsecurity|workload)\.trend.*\.com:443/$'
-  dsManagerUrl:
-    Type: String
-    Description: "Cloud One Workload Security Manager URL.(On the Workload Security console, go to Support > Deployment Scripts. Go to the top of the generated script and copy the dsManagerUrl.)"
-    AllowedPattern: '^https://(app\.deepsecurity|workload)\.trend.*\.com:443$'
-  dsTenantId:
-    Type: String
-    Description: "Cloud One Workload Security Tenant ID.(On the Workload Security console, go to Support > Deployment Scripts. Scroll to the bottom of the generated script and copy the tenantID.)"
-    NoEcho: true
-    AllowedPattern: '^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$'
-  dsToken:
-    Type: String
-    Description: "Cloud One Workload Security Token ID.(On the Workload Security console, go to Support > Deployment Scripts. Scroll to the bottom of the generated script and copy the token.)"
-    NoEcho: true
-    AllowedPattern: '^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$'
   AccountAdminStatus:
     Type:  String
     Description: "Are you running this stack in delegated admin[DELEGATED_ADMIN] or directly on management account[SELF]."
@@ -215,14 +176,14 @@ Resources:
     Properties:
       Parameters:
         AccountAdminStatus: !Ref AccountAdminStatus
-        DeploymentTargets: !Ref DeploymentTargets
-        TargetKey: !Ref TargetKey
-        TargetValues: !Ref TargetValues
         CronJob: !Ref CronJob
-        dsActivationUrl: !Ref dsActivationUrl
-        dsManagerUrl: !Ref dsManagerUrl
-        dsTenantId: !Ref dsTenantId
-        dsToken: !Ref dsToken
+        CloudOneRegionEndpoint: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
+        TrendKeyArn: !GetAtt TrendKey.Arn
+        CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        QSS3BucketRegion: !Ref QSS3BucketRegion
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-ws-ssm-association/c1ws-ssm-orgs.template.yaml'
 
 
@@ -317,6 +278,7 @@ Resources:
         - lambda_functions/packages/VisionOneEnrollmentFunction/lambda.zip
         - lambda_functions/packages/VisionOneGenerateEnrollmentTokenFunction/lambda.zip
         - lambda_functions/packages/GetOrganizationalTrailBucketName/lambda.zip
+        - lambda_functions/packages/AgentDeploymentScriptFunction/lambda.zip
 
 
   rCopyZipsRole:
