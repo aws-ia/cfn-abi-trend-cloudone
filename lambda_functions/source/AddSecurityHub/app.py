@@ -7,6 +7,7 @@ import time
 # Cloud One API Key
 cloud_one_api_key = os.environ['CloudOneApiKey']
 cloud_one_region = os.environ['CloudOneRegion']
+enable_security_hub = os.environ['EnableSecurityHub']
 
 
 
@@ -29,10 +30,13 @@ try:
   if response['HubArn'] is not None:
     print("Security Hub is enabled")
 except Exception as e:
-    print("Security Hub is not enabled, enabling now")
-    enable_security_hub = client.enable_security_hub(EnableDefaultStandards=False)
-    if enable_security_hub['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print("Security Hub is now enabled")
+    if enable_security_hub == "true":
+        print("Security Hub is not enabled, enabling now")
+        enable_security_hub = client.enable_security_hub(EnableDefaultStandards=False)
+        if enable_security_hub['ResponseMetadata']['HTTPStatusCode'] == 200:
+            print("Security Hub is now enabled")
+    else:
+        print("Security Hub is not enabled, please enable it to continue")
 
 # Wait 2 seconds to make sure the product is enabled
 time.sleep(2)

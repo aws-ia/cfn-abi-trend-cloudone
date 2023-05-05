@@ -9,6 +9,7 @@ Metadata:
       Parameters:
       - CloudOneApiKey
       - CloudOneRegion
+      - EnableSecurityHub
 
 Parameters:
   CloudOneApiKey:
@@ -19,6 +20,13 @@ Parameters:
     Description: "Cloud One region to be used, default: us-1"
     Default: "us-1"
     Type: String
+  EnableSecurityHub:
+    Description: "Enable Security Hub integration, default: true"
+    Default: true
+    Type: String
+    AllowedValues:
+      - true
+      - false
 
 Resources:
     LambdaExecutionRole:
@@ -50,4 +58,5 @@ Resources:
           Variables:
             CloudOneApiKey: !Ref CloudOneApiKey
             CloudOneRegion: !Ref CloudOneRegion
+            EnableSecurityHub: !Ref EnableSecurityHub
         
