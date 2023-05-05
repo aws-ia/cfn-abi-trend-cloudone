@@ -81,6 +81,7 @@ Parameters:
     Description: Vision One Authentication Token. See https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
     Type: String
     NoEcho: true
+    Default: ""
   VisionOneRegion:
     Description: Vision One Region. See https://automation.trendmicro.com/xdr/Guides/Regional-Domains
     Type: String
@@ -98,6 +99,7 @@ Parameters:
       have an existing Organizational CloudTrail, please create one before deploying.
     Type: String
     MinLength: "3"
+    Default: "replace-me"
 
   # SSM Integration Parameters
   CronJob:
