@@ -20,7 +20,7 @@ tests:
     regions:
     - us-east-1
     template: templates/main.template.yaml
-  t1: # CloudTrail integration only.
+  cloudtrail:
     parameters:
       DeployCloudTrailIntegration: "True"
       DeploySSMIntegration: "False"
