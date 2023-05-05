@@ -9,6 +9,7 @@ import cfnresponse
 # set variables
 url = os.environ['C1_API_ENDPOINT']
 api_key = os.environ['C1_API_KEY']
+ws_api_endpoint = "https://workload."+url+".cloudone.trendmicro.com/api/agentdeploymentscripts"
 
 # Create an AWS Organizations client
 org_client = boto3.client('organizations')
@@ -45,6 +46,7 @@ def lambda_handler(event, context):
             
             # get secret
             client = boto3.client('secretsmanager')
+            print(api_key)
             secrets = client.get_secret_value(SecretId=api_key)
             secrets_manager = json.loads(secrets["SecretString"])
             cloud_one_api_key = secrets_manager["c1apikey"]
@@ -66,7 +68,7 @@ def lambda_handler(event, context):
             'Content-Type': 'application/json'
             }
 
-            response = http.request("POST", url, headers=headers, body=payload)
+            response = http.request("POST", ws_api_endpoint, headers=headers, body=payload)
             response_str = response.data.decode('utf-8') # convert response to string
             #Filter response values for ACTIVATIONURL, MANAGERURL, TenantID, and Token using regular expressions
             activation_url = re.search(r"ACTIVATIONURL='(.+?)'", response_str).group(1)

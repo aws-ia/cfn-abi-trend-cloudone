@@ -10,6 +10,7 @@ http = urllib3.PoolManager()
 url = os.environ['C1_API_ENDPOINT']
 sm = boto3.client('secretsmanager')
 api_key = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
+ws_api_endpoint = "https://workload."+url+".cloudone.trendmicro.com/api/agentdeploymentscripts"
 
 # Create an AWS Organizations client
 org_client = boto3.client('organizations')
@@ -72,7 +73,7 @@ def lambda_handler(event, context):
                 'Content-Type': 'application/json'
             }
 
-            response = http.request("POST", url, headers=headers, body=payload)
+            response = http.request("POST", ws_api_endpoint, headers=headers, body=payload)
             response_str = response.data.decode(
                 'utf-8')  # convert response to string
             # Filter response values for ACTIVATIONURL, MANAGERURL, TenantID, and Token using regular expressions
