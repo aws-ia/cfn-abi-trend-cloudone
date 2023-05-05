@@ -97,6 +97,7 @@ Parameters:
     Description: Bucket name of an existing Organizational CloudTrail. If you do not
       have an existing Organizational CloudTrail, please create one before deploying.
     Type: String
+    Default: "replaceme"
     MinLength: "3"
 
   # SSM Integration Parameters
