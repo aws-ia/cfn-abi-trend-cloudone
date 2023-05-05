@@ -35,7 +35,7 @@ tests:
     parameters:
       DeployCloudTrailIntegration: "False"
       DeploySSMIntegration: "True"
-      DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
+      DeploymentTargets: $[taskcat_ssm_/trend/ssm_deployment_targets]
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       AccountAdminStatus: DELEGATED_ADMIN
     regions:
