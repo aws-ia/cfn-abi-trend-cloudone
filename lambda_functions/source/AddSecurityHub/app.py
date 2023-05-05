@@ -7,7 +7,7 @@ import time
 # Cloud One API Key
 cloud_one_api_key = os.environ['CloudOneApiKey']
 cloud_one_region = os.environ['CloudOneRegion']
-enable_security_hub = os.environ['EnableSecurityHub']
+# enable_security_hub = os.environ['EnableSecurityHub']
 
 
 
