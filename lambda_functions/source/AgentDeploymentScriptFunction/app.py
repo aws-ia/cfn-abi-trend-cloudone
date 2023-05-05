@@ -7,10 +7,10 @@ import os
 http = urllib3.PoolManager()
 
 # set variables
-url = os.environ['C1_API_ENDPOINT']
+region = os.environ['C1_API_ENDPOINT']
 sm = boto3.client('secretsmanager')
-api_key = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
-ws_api_endpoint = "https://workload."+url+".cloudone.trendmicro.com/api/agentdeploymentscripts"
+cloud_one_api_key = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
+ws_api_endpoint = "https://workload."+region+".cloudone.trendmicro.com/api/agentdeploymentscripts"
 
 # Create an AWS Organizations client
 org_client = boto3.client('organizations')
@@ -49,12 +49,6 @@ def lambda_handler(event, context):
     physicalResourceId = None
     try:
         if event["RequestType"] == "Create" or event["RequestType"] == "Update":
-
-            # get secret
-            client = boto3.client('secretsmanager')
-            secrets = client.get_secret_value(SecretId=api_key)
-            secrets_manager = json.loads(secrets["SecretString"])
-            cloud_one_api_key = secrets_manager["c1apikey"]
 
             # Base Deployment Script generation to get params.
             payload = json.dumps({
