@@ -132,6 +132,7 @@ Resources:
             - Effect: Allow
               Action:
                 - securityhub:EnableImportFindingsForProduct
+                - securityhub:DisableImportFindingsForProduct
               Resource:
                 - !Sub arn:${AWS::Partition}:securityhub:${AWS::Region}:${AWS::AccountId}:product/trendmicro/trendmicro-cloudone
         PolicyName: SecurityHubPermissions
