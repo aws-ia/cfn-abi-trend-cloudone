@@ -93,11 +93,22 @@ def remove_integration(integration_id):
 
     # Delete the integration
     try:
+        # Delete integration on Cloud One
         delete_sechub_integration = http.request('DELETE', url, headers=headers)
         delete_sechub_integration = json.loads(delete_sechub_integration.data.decode('utf-8'))
         print(delete_sechub_integration)
+
+        # Disable the product in Security Hub
+        disable_sechub_product = security_hub_client.disable_import_findings_for_product(ProductArn=add_tm_arn)
+        check_disable = security_hub_client.list_enabled_products_for_import().get('ProductSubscriptions')
+        if get_tm_arn in check_disable:
+            print(f"Failed to disable the product {add_tm_arn} in Security Hub.")
+        else:
+            print(f"Successfully disabled the product {add_tm_arn} in Security Hub.")
+
     except Exception as exception:
         print(exception)
+
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
     response_data = {}
