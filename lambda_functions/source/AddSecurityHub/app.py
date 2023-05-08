@@ -2,11 +2,12 @@ import boto3
 import os
 import urllib3
 import json
-import time
+# import time
 
 # Cloud One API Key
 cloud_one_api_key = os.environ['CloudOneApiKey']
 cloud_one_region = os.environ['CloudOneRegion']
+# enable_security_hub = os.environ['EnableSecurityHub']
 
 
 
@@ -23,19 +24,23 @@ get_tm_arn = "arn:aws:securityhub:"+aws_region+":"+aws_account_id+":product-subs
 # ARN used to add the product to the list of activated products
 add_tm_arn = "arn:aws:securityhub:"+aws_region+"::product/trend-micro/cloud-one"
 
-# Check if Security Hub is enabled in the account, in case not enable it
-try:
-  response = client.describe_hub()
-  if response['HubArn'] is not None:
-    print("Security Hub is enabled")
-except Exception as e:
-    print("Security Hub is not enabled, enabling now")
-    enable_security_hub = client.enable_security_hub(EnableDefaultStandards=False)
-    if enable_security_hub['ResponseMetadata']['HTTPStatusCode'] == 200:
-        print("Security Hub is now enabled")
+# Disable due to Security Hub will be handled by AWS
+    # Check if Security Hub is enabled in the account, in case not enable it
+    # try:
+    #   response = client.describe_hub()
+    #   if response['HubArn'] is not None:
+    #     print("Security Hub is enabled")
+    # except Exception as e:
+    #     if enable_security_hub == "true":
+    #         print("Security Hub is not enabled, enabling now")
+    #         enable_security_hub = client.enable_security_hub(EnableDefaultStandards=False)
+    #         if enable_security_hub['ResponseMetadata']['HTTPStatusCode'] == 200:
+    #             print("Security Hub is now enabled")
+    #     else:
+    #         print("Security Hub is not enabled, please enable it to continue")
 
-# Wait 2 seconds to make sure the product is enabled
-time.sleep(2)
+    # # Wait 2 seconds to make sure the product is enabled
+    # time.sleep(2)
 
 # Get the list of activated products
 list_activated_product = client.list_enabled_products_for_import().get('ProductSubscriptions')
