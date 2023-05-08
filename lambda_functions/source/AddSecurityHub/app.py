@@ -85,8 +85,19 @@ def initialize_integration():
     return integration_id
 
 def remove_integration(integration_id):
-    print("TODO: Remove the integration from Security Hub")
+    headers = {
+        'api-version': 'v1',
+        'Authorization': 'ApiKey '+cloudOneApiKey+''
+    }
+    url = "https://integrations."+cloud_one_region+".cloudone.trendmicro.com/api/integrations/"+integration_id
 
+    # Delete the integration
+    try:
+        delete_sechub_integration = http.request('DELETE', url, headers=headers)
+        delete_sechub_integration = json.loads(delete_sechub_integration.data.decode('utf-8'))
+        print(delete_sechub_integration)
+    except Exception as exception:
+        print(exception)
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS
     response_data = {}
@@ -114,4 +125,3 @@ def lambda_handler(event, context):
         status = cfnresponse.FAILED
     
     cfnresponse.send(event, context, status, response_data, physicalResourceId)
-
