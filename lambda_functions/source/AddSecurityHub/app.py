@@ -1,18 +1,17 @@
-import boto3
+"""Custom Resource to enable Trend Cloud One in Security Hub.
+Version: 1.0
+
+Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+SPDX-License-Identifier: MIT-0
+"""
+import json
 import os
 import urllib3
-import json
-# import time
+import cfnresponse
+import boto3
 
-# Cloud One API Key
-cloud_one_api_key = os.environ['CloudOneApiKey']
-cloud_one_region = os.environ['CloudOneRegion']
-# enable_security_hub = os.environ['EnableSecurityHub']
-
-
-
-# Initialize the AWS SDK
-client = boto3.client('securityhub')
+# Initialize the SecurityHub SDK
+security_hub_client = boto3.client('securityhub')
 
 # Get the AWS account ID and region
 aws_account_id = boto3.client('sts').get_caller_identity().get('Account')
@@ -24,82 +23,95 @@ get_tm_arn = "arn:aws:securityhub:"+aws_region+":"+aws_account_id+":product-subs
 # ARN used to add the product to the list of activated products
 add_tm_arn = "arn:aws:securityhub:"+aws_region+"::product/trend-micro/cloud-one"
 
-# Disable due to Security Hub will be handled by AWS
-    # Check if Security Hub is enabled in the account, in case not enable it
-    # try:
-    #   response = client.describe_hub()
-    #   if response['HubArn'] is not None:
-    #     print("Security Hub is enabled")
-    # except Exception as e:
-    #     if enable_security_hub == "true":
-    #         print("Security Hub is not enabled, enabling now")
-    #         enable_security_hub = client.enable_security_hub(EnableDefaultStandards=False)
-    #         if enable_security_hub['ResponseMetadata']['HTTPStatusCode'] == 200:
-    #             print("Security Hub is now enabled")
-    #     else:
-    #         print("Security Hub is not enabled, please enable it to continue")
+cloud_one_region = os.environ['CloudOneRegion']
+sm = boto3.client('secretsmanager')
+cloudOneApiKey = sm.get_secret_value(SecretId=os.environ['CloudOneApiKeySecret'])['SecretString']
 
-    # # Wait 2 seconds to make sure the product is enabled
-    # time.sleep(2)
+headers = {
+    'api-version': 'v1',
+    'Authorization': 'ApiKey '+cloudOneApiKey+'',
+    'Content-Type': 'application/json'
+}
 
-# Get the list of activated products
-list_activated_product = client.list_enabled_products_for_import().get('ProductSubscriptions')
-
-# Check if the product is already in the list of activated products, if not add it
-if get_tm_arn in list_activated_product:
-    print(f"The arn {get_tm_arn} exists in the list, no action is required.")
-else:
-    print(f"The arn {get_tm_arn} does not exist in the list, adding it now.")
-    add_tm_product = client.enable_import_findings_for_product(ProductArn=add_tm_arn)
-    print(f"Success")
-
-# Add Security Hub integration to Cloud One
 http = urllib3.PoolManager()
 
-# Headers for the GET and POST requests
-get_header = {
-        'api-version': 'v1',
-        'Authorization': 'ApiKey '+cloud_one_api_key+''
-    }
-post_header = {
-        'api-version': 'v1',
-        'Authorization': 'ApiKey '+cloud_one_api_key+'',
-        'Content-Type': 'application/json'
-    }
-
-# URL for the GET and POST requests
 url = "https://integrations."+cloud_one_region+".cloudone.trendmicro.com/api/integrations"
 
-# Get the list of integrations
-get_sechub_integration = http.request('GET', url, headers=get_header)
-get_sechub_integration = json.loads(get_sechub_integration.data.decode('utf-8'))
-get_sechub_integration = get_sechub_integration["integrations"]
+def initialize_integration():
 
-# Payload to add the Security Hub integration
-payload = {
-"name": f"Security Hub Integration - {aws_account_id}",
-"description": f"This is an integration to send events from container security to security hub for the AWS Account Id {aws_account_id}",
-"type": "SECURITY_HUB",
-"configuration": {
-"awsRegion": f"{aws_region}",
-"awsAccountId": f"{aws_account_id}"
-},
-"filters": {
-"serviceIds": [],
-"severityIds": []
-}
-}
+    # Get the list of activated products
+    list_activated_product = security_hub_client.list_enabled_products_for_import().get('ProductSubscriptions')
 
-# Check if there is already an integration for the AWS Account ID, in case not add it
-for item in get_sechub_integration:
-    if item['configuration']['awsAccountId'] == aws_account_id:
-        print(f"There is already an integration for the AWS Account ID {aws_account_id}")
-        break
-else:
-    print(f"No match found for ID {aws_account_id}, adding integration now.")
-    add_sechub_integration = http.request('POST', url, headers=post_header, body=json.dumps(payload))
-    add_sechub_integration = json.loads(add_sechub_integration.data.decode('utf-8'))
-    integration_id = add_sechub_integration["id"]
-    print(f"Success, the integration Id is: {integration_id}")
+    # Check if the product is already in the list of activated products, if not add it
+    if get_tm_arn in list_activated_product:
+        print(f"The arn {get_tm_arn} exists in the list, no action is required.")
+    else:
+        print(f"The arn {get_tm_arn} does not exist in the list, adding it now.")
+        security_hub_client.enable_import_findings_for_product(ProductArn=add_tm_arn)
+        print("Success")
 
+    # Get the list of integrations
+    get_sechub_integration = http.request('GET', url, headers=headers)
+    get_sechub_integration = json.loads(get_sechub_integration.data.decode('utf-8'))
+    get_sechub_integration = get_sechub_integration["integrations"]
+
+    # Payload to add the Security Hub integration
+    payload = {
+        "name": f"Security Hub Integration - {aws_account_id}",
+        "description": f"This is an integration to send events from Trend Cloud One to Security Hub for the AWS Account Id {aws_account_id}",
+        "type": "SECURITY_HUB",
+        "configuration": {
+            "awsRegion": f"{aws_region}",
+            "awsAccountId": f"{aws_account_id}"
+        },
+        "filters": {
+            "serviceIds": [],
+            "severityIds": []
+        }
+    }
+
+    # Check if there is already an integration for the AWS Account ID, in case not add it
+    integration_id = None
+    for item in get_sechub_integration:
+        if item['configuration']['awsAccountId'] == aws_account_id:
+            print(f"There is already an integration for the AWS Account ID {aws_account_id}")
+            break
+    else:
+        print(f"No match found for ID {aws_account_id}, adding integration now.")
+        add_sechub_integration = http.request('POST', url, headers=headers, body=json.dumps(payload))
+        add_sechub_integration = json.loads(add_sechub_integration.data.decode('utf-8'))
+        integration_id = add_sechub_integration["id"]
+    print(f"The integration Id is: {integration_id}")
+    return integration_id
+
+def remove_integration(integration_id):
+    print("TODO: Remove the integration from Security Hub")
+
+def lambda_handler(event, context):
+    status = cfnresponse.SUCCESS
+    response_data = {}
+    physicalResourceId = None
+    try:
+        
+        if event["RequestType"] == "Create":
+            integration_id = initialize_integration()
+            physicalResourceId = integration_id 
+            response_data = {"ID": integration_id}
+            
+        elif event["RequestType"] == "Update":
+            integration_id = event["PhysicalResourceId"]
+            remove_integration(integration_id)
+            integration_id = initialize_integration()
+            physicalResourceId = integration_id
+            response_data = {"ID": physicalResourceId}
+
+        else: # if event["RequestType"] == "Delete":
+            integration_id = event["PhysicalResourceId"]
+            remove_integration(integration_id)
+        
+    except Exception as exception:
+        print(exception)
+        status = cfnresponse.FAILED
+    
+    cfnresponse.send(event, context, status, response_data, physicalResourceId)
 

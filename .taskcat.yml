@@ -23,6 +23,7 @@ tests:
     parameters:
       DeployCloudTrailIntegration: "True"
       DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
@@ -35,6 +36,7 @@ tests:
     parameters:
       DeployCloudTrailIntegration: "False"
       DeploySSMIntegration: "True"
+      DeploySecurityHubIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       AccountAdminStatus: SELF
       QSS3BucketName: $[taskcat_autobucket]
@@ -42,10 +44,22 @@ tests:
     regions:
     - us-east-1
     template: templates/main.template.yaml
-  cloudtrail-and-ssm-integration:
+  security-hub:
+    parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "True"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
+  all-integrations:
     parameters:
       DeployCloudTrailIntegration: "True"
       DeploySSMIntegration: "True"
+      DeploySecurityHubIntegration: "True"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
