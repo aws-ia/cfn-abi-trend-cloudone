@@ -16,7 +16,6 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
-      
     regions:
     - us-east-1
     template: templates/main.template.yaml
@@ -36,9 +35,10 @@ tests:
     parameters:
       DeployCloudTrailIntegration: "False"
       DeploySSMIntegration: "True"
-      DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
-      AccountAdminStatus: DELEGATED_ADMIN
+      AccountAdminStatus: SELF
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
     regions:
     - us-east-1
     template: templates/main.template.yaml
@@ -51,11 +51,6 @@ tests:
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
-      DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
-      dsActivationUrl: $[taskcat_ssm_/trend/activation_url]
-      dsManagerUrl: $[taskcat_ssm_/trend/manager_url]
-      dsTenantId: $[taskcat_ssm_/trend/tenant_id]
-      dsToken: $[taskcat_ssm_/trend/ds_token]
       AccountAdminStatus: DELEGATED_ADMIN
     regions:
     - us-east-1

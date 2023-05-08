@@ -81,6 +81,7 @@ Parameters:
     Description: Vision One Authentication Token. See https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
     Type: String
     NoEcho: true
+    Default: ""
   VisionOneRegion:
     Description: Vision One Region. See https://automation.trendmicro.com/xdr/Guides/Regional-Domains
     Type: String
@@ -99,6 +100,7 @@ Parameters:
     Type: String
     Default: "replaceme"
     MinLength: "3"
+    Default: "replace-me"
 
   # SSM Integration Parameters
   CronJob:
@@ -141,13 +143,13 @@ Parameters:
     Type: String
 
 Conditions:
-  DeployCloudTrailIntegration: !Equals [!Ref DeployCloudTrailIntegration, "True"]
-  DeploySSMIntegration: !Equals [!Ref DeploySSMIntegration, "True"]
-  DeploySecurityHubIntegration: !Equals [!Ref DeploySecurityHubIntegration, "True"]
+  DeployCloudTrailIntegrationCondition: !Equals [!Ref DeployCloudTrailIntegration, "True"]
+  DeploySSMIntegrationCondition: !Equals [!Ref DeploySSMIntegration, "True"]
+  DeploySecurityHubIntegrationCondition: !Equals [!Ref DeploySecurityHubIntegration, "True"]
 
 Resources:
   CloudTrailIntegration:
-    Condition: DeployCloudTrailIntegration
+    Condition: DeployCloudTrailIntegrationCondition
     DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -172,7 +174,7 @@ Resources:
           Value: !Ref TrendSolutionTagKey
 
   SSMIntegration:
-    Condition: DeploySSMIntegration
+    Condition: DeploySSMIntegrationCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
@@ -185,7 +187,7 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
         QSS3BucketRegion: !Ref QSS3BucketRegion
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-ws-ssm-association/c1ws-ssm-orgs.template.yaml'
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-ws-ssm-association/main.template.yaml'
 
 
   ## Common Resources ##
