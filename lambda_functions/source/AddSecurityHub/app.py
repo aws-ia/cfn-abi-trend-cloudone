@@ -85,21 +85,15 @@ def initialize_integration():
     return integration_id
 
 def remove_integration(integration_id):
-    headers = {
-        'api-version': 'v1',
-        'Authorization': 'ApiKey '+cloudOneApiKey+''
-    }
-    url = "https://integrations."+cloud_one_region+".cloudone.trendmicro.com/api/integrations/"+integration_id
-
     # Delete the integration
     try:
         # Delete integration on Cloud One
-        delete_sechub_integration = http.request('DELETE', url, headers=headers)
+        delete_sechub_integration = http.request('DELETE', f"{url}/{integration_id}", headers=headers)
         delete_sechub_integration = json.loads(delete_sechub_integration.data.decode('utf-8'))
         print(delete_sechub_integration)
 
         # Disable the product in Security Hub
-        disable_sechub_product = security_hub_client.disable_import_findings_for_product(ProductArn=add_tm_arn)
+        security_hub_client.disable_import_findings_for_product(ProductArn=add_tm_arn)
         check_disable = security_hub_client.list_enabled_products_for_import().get('ProductSubscriptions')
         if get_tm_arn in check_disable:
             print(f"Failed to disable the product {add_tm_arn} in Security Hub.")
