@@ -18,7 +18,7 @@ Metadata:
           default: 'Trend Cloud One'
         Parameters:
           - CloudOneRegionEndpoint
-          - CloudOneAPIKey
+          - CloudOneApiKeySecret
 Parameters:
   CronJob:
     Type: String
