@@ -17,7 +17,6 @@ Metadata:
           - pSRAStagingS3KeyPrefix
           - pSRAS3BucketRegion
           - pSRAAlarmEmail
-          - pEnableSecurityHub
 
       - Label:
           default: SecurityHub Configuration Properties
