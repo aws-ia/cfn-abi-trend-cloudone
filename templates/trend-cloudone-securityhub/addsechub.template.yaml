@@ -64,7 +64,6 @@ Parameters:
 Resources:
   AddSecurityHub:
     Type: AWS::CloudFormation::CustomResource
-    DependsOn: AddSecurityHubFunction
     Properties:
       ServiceToken: !GetAtt AddSecurityHubFunction.Arn
 
