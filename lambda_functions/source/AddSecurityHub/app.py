@@ -21,7 +21,7 @@ aws_region = boto3.session.Session().region_name
 get_tm_arn = "arn:aws:securityhub:"+aws_region+":"+aws_account_id+":product-subscription/trend-micro/cloud-one"
 
 # ARN used to add the product to the list of activated products
-add_tm_arn = "arn:aws:securityhub:"+aws_region+"::product/trend-micro/cloud-one"
+add_tm_arn = os.environ['CloudOneProductArn']
 
 cloud_one_region = os.environ['CloudOneRegion']
 sm = boto3.client('secretsmanager')
@@ -43,13 +43,16 @@ def initialize_integration():
     list_activated_product = security_hub_client.list_enabled_products_for_import().get('ProductSubscriptions')
 
     # Check if the product is already in the list of activated products, if not add it
+
     if get_tm_arn in list_activated_product:
         print(f"The arn {get_tm_arn} exists in the list, no action is required.")
     else:
-        print(f"The arn {get_tm_arn} does not exist in the list, adding it now.")
-        security_hub_client.enable_import_findings_for_product(ProductArn=add_tm_arn)
-        print("Success")
-
+        try:
+            print(f"The arn {get_tm_arn} does not exist in the list, adding it now.")
+            security_hub_client.enable_import_findings_for_product(ProductArn=add_tm_arn)
+        except Exception as exception:
+            raise exception
+        
     # Get the list of integrations
     get_sechub_integration = http.request('GET', url, headers=headers)
     get_sechub_integration = json.loads(get_sechub_integration.data.decode('utf-8'))
@@ -87,21 +90,17 @@ def initialize_integration():
 def remove_integration(integration_id):
     # Delete the integration
     try:
+
+        # Deactivate the product
+        security_hub_client.disable_import_findings_for_product(ProductSubscriptionArn=get_tm_arn)
+        
         # Delete integration on Cloud One
         delete_sechub_integration = http.request('DELETE', f"{url}/{integration_id}", headers=headers)
         delete_sechub_integration = json.loads(delete_sechub_integration.data.decode('utf-8'))
         print(delete_sechub_integration)
-
-        # Disable the product in Security Hub
-        security_hub_client.disable_import_findings_for_product(ProductArn=add_tm_arn)
-        check_disable = security_hub_client.list_enabled_products_for_import().get('ProductSubscriptions')
-        if get_tm_arn in check_disable:
-            print(f"Failed to disable the product {add_tm_arn} in Security Hub.")
-        else:
-            print(f"Successfully disabled the product {add_tm_arn} in Security Hub.")
-
     except Exception as exception:
         print(exception)
+        raise exception
 
 def lambda_handler(event, context):
     status = cfnresponse.SUCCESS

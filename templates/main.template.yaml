@@ -25,6 +25,11 @@ Metadata:
         - VisionOneRegion
         - ExistingOrganizationalCloudtrailBucketName
     - Label:
+        default: 'Parameters for SecurityHub integration. Please adjust the fields below 
+          as required for deployment.'
+      Parameters:
+        - EnableSecurityHub
+    - Label:
         default: 'Parameters for SSM integration. Please adjust the fields below as
           required for deployment.'
       Parameters:
@@ -113,6 +118,15 @@ Parameters:
       - "SELF"
       - "DELEGATED_ADMIN"
     Default: "SELF"
+
+  # SecurityHub Integration Parameters
+  EnableSecurityHub:
+    Description: Enable Security Hub in Audit Account
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
   
   # Operational Parameters
   QSS3BucketName:
@@ -198,7 +212,15 @@ Resources:
         CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        EnableSecurityHub: !Ref EnableSecurityHub
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-securityhub/main.template.yaml'
+      Tags:
+        - Key: Solution
+          Value: !Ref TrendSolutionName
+        - Key: SolutionTagKey
+          Value: !Ref TrendSolutionTagKey
 
   ## Common Resources ##
 

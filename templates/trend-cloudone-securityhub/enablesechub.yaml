@@ -4,7 +4,7 @@
 ########################################################################
 AWSTemplateFormatVersion: 2010-09-09
 Description:
-  "Main Root Stack of the Trend Cloud One SecurityHub Integration for AWS Org. This Stack is using ABI module designed to check/enable SecurityHub in the org."
+  "Main Stack of the Trend Cloud One SecurityHub Integration for AWS Org. This Stack is using ABI module designed to check/enable SecurityHub in the org."
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -17,6 +17,7 @@ Metadata:
           - pSRAStagingS3KeyPrefix
           - pSRAS3BucketRegion
           - pSRAAlarmEmail
+          - pEnableSecurityHub
 
       - Label:
           default: SecurityHub Configuration Properties
@@ -42,26 +43,8 @@ Metadata:
           default: EventBridge Rule Properties
         Parameters:
           - pComplianceFrequency
-      
-      - Label:
-          default: 'Please adjust the fields below as required for deployment.'
-        Parameters:
-          - TrendKeyArn
-          - CloudOneApiKeySecret
-          - CloudOneRegion
-          - TrendStagingS3Bucket
-          - QSS3BucketName
-          - QSS3KeyPrefix
-          - QSS3BucketRegion
-          - DeploySecurityHubIntegration
-          - EnableSecurityHub
 
 Parameters:
-  EnableSecurityHub:
-    AllowedValues: ['true', 'false']
-    Default: 'true'
-    Description: Indicates whether to enable Security Hub in all accounts and regions.
-    Type: String
   pCISStandardVersion:
     AllowedValues: [1.2.0, 1.4.0]
     Default: 1.4.0
@@ -111,7 +94,7 @@ Parameters:
     Type: String
   pEnableSecurityBestPracticesStandard:
     AllowedValues: ['true', 'false']
-    Default: 'true'
+    Default: 'false'
     Description: Indicates whether to enable the AWS Foundational Security Best Practices Standard.
     Type: String
   pLambdaLogGroupKmsKey:
@@ -162,68 +145,10 @@ Parameters:
     Default: v1.5
     Description: The SRA solution version. Used to trigger updates on the nested StackSets.
     Type: String
-  TrendKeyArn:
-    Description: KMS Key Arn used to encrypt all Trend secrets.
-    Type: String
-  CloudOneApiKeySecret:
-    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
-      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
-    Type: String
-    NoEcho: true
-  CloudOneRegion:
-    Description: Cloud One Region. More info at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-regions/
-    Type: String
-    Default: us-1
-    AllowedValues:
-      - us-1
-      - trend-us-1
-      - au-1
-      - ie-1
-      - sg-1
-      - in-1
-      - jp-1
-      - ca-1
-      - de-1
-  TrendStagingS3Bucket:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    Description: S3 bucket name for the Trend Cloud One staging assets. Deployment
-      bucket name can include numbers, lowercase letters, uppercase letters, and hyphens
-      (-). It cannot start or end with a hyphen (-).
-    Type: String
-  QSS3BucketName:
-    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
-    ConstraintDescription: Deployment bucket name can include numbers, lowercase
-      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
-      (-).
-    Default: aws-abi-pilot
-    Description: S3 bucket name for the Deployment assets. Deployment bucket name
-      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
-      It cannot start or end with a hyphen (-).
-    Type: String
-  QSS3KeyPrefix:
-    AllowedPattern: ^[0-9a-zA-Z-/.]*$
-    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
-      uppercase letters, hyphens (-), dots(.) and forward slash (/).
-    Default: "cfn-abi-trend-cloudone/"
-    Description: S3 key prefix for the Deployment assets. Deployment key prefix
-      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
-      forward slash (/).
-    Type: String
-  QSS3BucketRegion:
-    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
-    ConstraintDescription: Region name must be a valid AWS region name.
-    Default: us-east-1
-    Description: Region name for the Deployment bucket.
-    Type: String
-
-Conditions:
-  EnableSecurityHubCondition:
-    !Equals [!Ref EnableSecurityHub, 'true']
 
 Resources:
   SecurityHubEnableInOrg:
     Type: AWS::CloudFormation::Stack
-    Condition: EnableSecurityHubCondition
     Properties:
       TemplateURL: !Sub https://${pSRASourceS3BucketName}.s3.${pSRAS3BucketRegion}.${AWS::URLSuffix}/${pSRAStagingS3KeyPrefix}/submodules/cfn-abi-aws-securityhub/templates/sra-securityhub-enable-in-org-ssm.yaml
       Parameters:
@@ -247,14 +172,4 @@ Resources:
       Tags:
         - Key: sra-solution
           Value: !Ref pSRAStagingS3KeyPrefix
-  CloudOneAddSecurityHub:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-securityhub/addsechub.template.yaml'
-      Parameters:
-        TrendKeyArn: !Ref TrendKeyArn
-        CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        CloudOneRegion: !Ref CloudOneRegion
-        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-        CloudOneProductArn: !Sub 'arn:aws:securityhub:${AWS::Region}::product/trend-micro/cloud-one'
+
