@@ -44,13 +44,9 @@ This solution will integrate Trend Cloud One security findings with SecurityHub 
 
 - CloudOneApiKey
   - Description: Cloud One API Key. See Requirements above for more details.
-
-### Optional - In case you already have Security enabled. (The template will enable it for you in case you don't have it enabled and you don't provide this information)
-
-- AuditAccountId
-  - Description: Your AWS Audit Account created by your Org/COntrol Tower, SecurityHub should be enable there or you can choose to enable via the deployment.
-- ControlTowerHomeRegion
-  - Description: The region where your Control Tower is deployed.
+- EnableSecurityHubIntegration
+  - Description: Enable SecurityHub Integration. If set to `true`, the integration will be enabled. If set to `false`, the integration will expect that you have done this already.
+  - Default: false
 
 
 ### Shouldn't be Changed from Default
@@ -128,6 +124,7 @@ aws cloudformation create-stack \
     --parameters ParameterKey=CloudOneAPIKey,ParameterValue=$CLOUDONE_API_KEY \
                  ParameterKey=CloudOneRegionEndpoint,ParameterValue=$CLOUDONE_REGION_ENDPOINT \
                  ParameterKey=DeploySecurityHubIntegration,ParameterValue=$DEPLOYSECURITYHUBINTEGRATION \
+                 ParameterKey=EnableSecurityHub,ParameterValue=$DEPLOYSECURITYHUBINTEGRATION \
     --capabilities CAPABILITY_NAMED_IAM
 ```
 
