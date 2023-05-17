@@ -1,15 +1,15 @@
 # AWS Organizations Trend Cloud One Workload Security SSM Automation
+
 ---
 
-Distributor is a feature integrated with AWS Systems Manager that you can use to securely store and distribute software packages in your accounts. 
+Distributor is a feature integrated with AWS Systems Manager that you can use to securely store and distribute software packages in your accounts.
 By integrating Workload Security with AWS Systems Manager Distributor, you can distribute Cloud One Workload Security agents across multiple platforms, control access to managed instances, and automate your deployments.
-
 
 ## AWS Systems Manager Integration Architecture
 
 ![SSM Integration Architecture](org-img.jpg)
 
-## What this solution does.
+## What this solution does
 
 This solution will distribute the Workload Security agent across OU member accounts across all default enabled regions.
 
@@ -36,21 +36,22 @@ To deploy the solution, launch this CloudFormation template in your organization
 
 ---
 
-### Provide the following inputs for the template parameters:
+### Provide the following inputs for the template parameters
 
 #### **AccountAdminStatus**
-  - Stack Name: Enter a name for the Stack.
-  - AccountAdminStatus: Specify if the solution will use a delegated administrator account within the Organization to manage the software packages. CloudFormation StackSet IAM roles should be provisioned beforehand.
+
+- Stack Name: Enter a name for the Stack.
+- AccountAdminStatus: Specify if the solution will use a delegated administrator account within the Organization to manage the software packages. CloudFormation StackSet IAM roles should be provisioned beforehand.
 
 #### **Targets**
-  - CronJob: Specify the CRON Job for future scheduling. 
-    - [Default is everyday @10:15AM - cron(15 10 * * ? *)] [see here](https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchevents-expressions.html)
+
+- CronJob: Specify the CRON Job for future scheduling.
+  - [Default is everyday @10:15AM - cron(15 10 * * ? *)] [see here](https://docs.aws.amazon.com/lambda/latest/dg/services-cloudwatchevents-expressions.html)
 
 #### **Cloud One Workload Security**
-  - **CloudOneAPIKey**: Have an API Key for a [Cloud One](https://www.trendmicro.com/cloudone) account. Click [here](https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/#new-api-key) for a guide on how to generate an API Key.
-  
-  - Cloud One Account Region.
 
+- **CloudOneAPIKey**: Have an API Key for a [Cloud One](https://www.trendmicro.com/cloudone) account. Click [here](https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/#new-api-key) for a guide on how to generate an API Key.
+- Cloud One Account Region.
 
 ---
 
@@ -77,16 +78,19 @@ aws cloudformation create-stack \
 ---
 
 ## Limitations
+
 ---
+
 1. EC2 instances must have the SSM agent installed. Click the link for [supported SSM OS platforms](https://docs.aws.amazon.com/systems-manager/latest/userguide/prereqs-operating-systems.html).
 2. EC2 instances must have the required SSM permissions. Click the link for [setup configuration](https://docs.aws.amazon.com/systems-manager/latest/userguide/setup-instance-permissions.html).
 3. StackSets doesn't deploy stack instances to the organization management account, even if the organization management account is in your organization or in an OU in your organization. See here for [DeploymentTargets](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DeploymentTargets.html).
 
-
 ---
-## What AWS Permissions are used.
 
-#### The Lambda Uses the following:
+## What AWS Permissions are used
+
+### The Lambda Uses the following
+
 - secretsmanager:GetSecretValue
 - organizations:ListOrganizationalUnitsForParent
 - organizations:ListRoots
@@ -96,14 +100,17 @@ aws cloudformation create-stack \
 
 ---
 
-## To deploy this stack, the user would need the following permissions:
+## To deploy this stack, the user would need the following permissions
 
-#### Permissions to create, update, delete, and describe CloudFormation stacks.
+### Permissions to create, update, delete, and describe CloudFormation stacks
+
 - cloudformation:CreateStack
 - cloudformation:UpdateStack
 - cloudformation:DeleteStack
 - cloudformation:DescribeStacks
-#### Permissions to create, update, delete, and describe CloudFormation StacksSets, StackInstances.
+
+### Permissions to create, update, delete, and describe CloudFormation StacksSets, StackInstances
+
 - cloudformation:CreateStackSet
 - cloudformation:CreateStackInstances
 - cloudformation:DescribeStackSet
@@ -112,21 +119,31 @@ aws cloudformation create-stack \
 - cloudformation:DeleteStackSet
 - cloudformation:DeleteStackInstances
 - cloudformation:ListStackInstances
-#### Permissions to retrieve all Organizational Unit (OU) IDs in the organization.
+
+### Permissions to retrieve all Organizational Unit (OU) IDs in the organization
+
 - organizations:ListRoots
 - organizations:ListOrganizationalUnitsForParent
-#### Permissions to create, update and get the configuration of the Lambda function.
+
+### Permissions to create, update and get the configuration of the Lambda function
+
 - lambda:CreateFunction
 - lambda:UpdateFunctionCode
 - lambda:GetFunctionConfiguration
-#### Permissions to create the IAM role for the Lambda function and to attach and detach the policy to the role.
+
+### Permissions to create the IAM role for the Lambda function and to attach and detach the policy to the role
+
 - iam:CreateRole
 - iam:CreatePolicy
 - iam:AttachRolePolicy
 - iam:DeleteRolePolicy
-#### Permissions to create a CloudWatch Logs group and stream and to write logs from the Lambda function to CloudWatch Logs.
+
+### Permissions to create a CloudWatch Logs group and stream and to write logs from the Lambda function to CloudWatch Logs
+
 - logs:CreateLogGroup
 - logs:CreateLogStream
-- logs:PutLogEvents 
-#### Permission to download the code from an S3 bucket.
+- logs:PutLogEvents
+
+### Permission to download the code from an S3 bucket
+
 - s3:GetObject
