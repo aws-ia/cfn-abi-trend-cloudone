@@ -79,9 +79,78 @@ You can run the following:
 export BUCKET="your-cloudtrail-bucket"
 export APIKEY="your-cloudone-apikey"
 export TOKEN="your-visionone-enrollment-token"
-aws cloudformation create-stack --stack-name common-onboard-test --template-url https://cloudone-community.s3.us-east-1.amazonaws.com/latest/Common/Cloud-Account/aws-cfn-cloud-account-connector/main.template.yaml --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --parameters ParameterKey=ExistingCloudtrailBucketName,ParameterValue=$BUCKET ParameterKey=CloudOneApiKey,ParameterValue=$APIKEY ParameterKey=VisionOneServiceToken,ParameterValue=$TOKEN ParameterKey=QSS3KeyPrefix,ParameterValue=$HASH/
+aws cloudformation create-stack --stack-name common-onboard-test --template-url https://aws-abi-pilot.s3.us-east-1.amazonaws.com/latest/cfn-abi-trend-cloudone/templates/trend-cloudone-onboard/main.template.yaml --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --parameters ParameterKey=ExistingCloudtrailBucketName,ParameterValue=$BUCKET ParameterKey=CloudOneApiKey,ParameterValue=$APIKEY ParameterKey=VisionOneServiceToken,ParameterValue=$TOKEN ParameterKey=QSS3KeyPrefix,ParameterValue=$HASH/
 ```
 
 ## Removal or Deployment Failure
 
-If one decides to remove this stack, or if it fails during deployment, all modifications made by it, including any kind of account integration, will be reverted back to its pre-deployment state. The only exception is in the Vision One side. The manually created token needs to be deleted manually as well, otherwise the Cloud One account will remain enrolled to the Vision One account.
+If one decides to remove this stack, or if it fails during deployment, all modifications made by it, including any kind of account integration, will be reverted back to its pre-deployment state.
+
+---
+
+## What AWS Permissions are used
+
+### The different Lambda Functions triggered as Custom Resources requires the following permissions
+
+- secretsmanager:GetSecretValue (specific to the secrets created as part of this stack)
+- kms:Decrypt (specific to the key created as part of this stack)
+- Managed Policy: AWSLambdaBasicExecutionRole
+
+### Product required resources
+
+- Please check the [product documentation](https://cloudone.trendmicro.com/docs/) as they can get updated over time.
+
+---
+
+## To deploy this stack, the user would need the following permissions
+
+### Permissions to create, update, delete, and describe CloudFormation stacks
+
+- cloudformation:CreateStack
+- cloudformation:UpdateStack
+- cloudformation:DeleteStack
+- cloudformation:DescribeStacks
+
+### Permissions to create, update and get the configuration of the Lambda function
+
+- lambda:CreateFunction
+- lambda:UpdateFunctionCode
+- lambda:GetFunctionConfiguration
+
+### Permissions to create the IAM role for the Lambda function and to attach and detach the policy to the role
+
+- iam:ListAccountAliases
+- iam:CreateRole
+- iam:DeleteRole
+- iam:CreatePolicy
+- iam:PassRole
+- iam:AttachRolePolicy
+- iam:DetachRolePolicy
+- iam:DeleteRolePolicy
+- iam:PutRolePolicy
+- iam:GetRole
+- iam:GetRolePolicy
+
+### Permissions to create a CloudWatch Logs group and stream and to write logs from the Lambda function to CloudWatch Logs
+
+- logs:CreateLogGroup
+- logs:CreateLogStream
+- logs:PutLogEvents
+
+### Permissions to download the code from an S3 bucket
+
+- s3:GetObject
+- s3:GetBucketLocation
+
+### Permissions to create and trigger the Custom Resources:
+
+- lambda:InvokeFunction
+- lambda:CreateFunction
+- lambda:DeleteFunction
+- lambda:GetFunction
+- lambda:GetFunctionConfiguration
+- lambda:AddPermission
+- lambda:RemovePermission
+- lambda:UpdateFunctionCode
+- lambda:UpdateFunctionConfiguration
+- lambda:InvokeFunction
