@@ -218,6 +218,8 @@ Parameters:
 Conditions:
   EnableSecurityHubCondition:
     !Equals [!Ref EnableSecurityHub, 'true']
+  NotEnableSecurityHubCondition:
+    !Equals [!Ref EnableSecurityHub, 'false']
 
 Resources:
   SecurityHubEnableInOrg:
@@ -246,7 +248,23 @@ Resources:
       Tags:
         - Key: sra-solution
           Value: !Ref pSRAStagingS3KeyPrefix
+
+  CloudOneAddSecurityHubAfter:
+    Condition: EnableSecurityHubCondition
+    DependsOn: SecurityHubEnableInOrg
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-securityhub/addsechub.template.yaml'
+      Parameters:
+        TrendKeyArn: !Ref TrendKeyArn
+        CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
+        CloudOneRegion: !Ref CloudOneRegion
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+        CloudOneProductArn: !Sub 'arn:aws:securityhub:${AWS::Region}::product/trend-micro/cloud-one'
+
   CloudOneAddSecurityHub:
+    Condition: NotEnableSecurityHubCondition
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-securityhub/addsechub.template.yaml'
