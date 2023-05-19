@@ -12,6 +12,7 @@ tests:
       DeployCloudTrailIntegration: "False"
       DeploySSMIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
@@ -25,6 +26,7 @@ tests:
       DeploySSMIntegration: "False"
       DeploySecurityHubIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
@@ -38,6 +40,7 @@ tests:
       DeploySSMIntegration: "True"
       DeploySecurityHubIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       AccountAdminStatus: SELF
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
@@ -50,6 +53,7 @@ tests:
       DeploySSMIntegration: "False"
       DeploySecurityHubIntegration: "True"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       EnableSecurityHub: "false"
@@ -61,6 +65,7 @@ tests:
       DeployCloudTrailIntegration: "False"
       DeploySSMIntegration: "False"
       DeploySecurityHubIntegration: "True"
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
@@ -74,6 +79,7 @@ tests:
       DeploySSMIntegration: "True"
       DeploySecurityHubIntegration: "True"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]

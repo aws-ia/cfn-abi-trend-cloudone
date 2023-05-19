@@ -62,8 +62,7 @@ Parameters:
   OrganizationId:
     AllowedPattern: '^$|^o-[a-z0-9]{10,32}$'
     ConstraintDescription: Must start with 'o-' followed by from 10 to 32 lowercase letters or digits. (e.g. o-abc1234567)
-    Default: ''
-    Description: AWS Organizations ID.
+    Description: AWS Organizations ID. You can get it from Organizations, Settings, Organization ID.
     Type: String
 
   # Integration Decision Parameters
