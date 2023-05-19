@@ -56,6 +56,18 @@ tests:
     regions:
     - us-east-1
     template: templates/main.template.yaml
+  security-hub-no-abi:
+    parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "True"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      EnableSecurityHub: "false"
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
   all-integrations:
     parameters:
       DeployCloudTrailIntegration: "True"
