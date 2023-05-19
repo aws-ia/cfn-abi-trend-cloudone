@@ -1,6 +1,0 @@
-[submodule "submodules/cfn-abi-aws-securityhub"]
-	path = submodules/cfn-abi-aws-securityhub
-	url = https://github.com/aws-ia/cfn-abi-aws-securityhub.git
-[submodule "submodules/cfn-abi-aws-cloudtrail"]
-	path = submodules/cfn-abi-aws-cloudtrail
-	url = https://github.com/aws-ia/cfn-abi-aws-cloudtrail.git
