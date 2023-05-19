@@ -7,10 +7,9 @@ Metadata:
     - Label:
         default: 'Please adjust the fields below as required for deployment.'
       Parameters:
-      - CloudOneApiKey
+      - CloudOneApiKeySecret
       - VisionOneAuthenticationToken
       - VisionOneRegion
-      - TrendSolutionTagKey
       - TrendSolutionName
       - ExistingOrganizationalCloudtrailBucketName
     - Label:
@@ -19,17 +18,36 @@ Metadata:
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
-    ParameterLabels:
-      CloudOneApiKey:
-        default: CloudOneApiKey
 
 Parameters:
-  CloudOneApiKey:
-    Description: Cloud One API Key. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+  TrendKeyArn:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
+  CloudOneApiKeySecret:
+    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
+      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
     Type: String
     NoEcho: true
+  CloudOneAccountID:
+    Description: Cloud One Account Id. You can learn more about it at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+    Type: String
+  CloudOneRegion:
+    Description: Cloud One Region. More info at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-regions/
+    Type: String
+    Default: us-1
+    AllowedValues:
+       - us-1
+       - trend-us-1
+       - au-1
+       - ie-1
+       - sg-1
+       - in-1
+       - jp-1
+       - ca-1
+       - de-1
   VisionOneAuthenticationToken:
-    Description: Vision One Authentication Token. See https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
+    Description: Vision One Authentication Token. See 
+      https://docs.trendmicro.com/en-us/enterprise/trend-vision-one-olh/administrative-setti/user-accounts/obtaining-api-keys-f_001.aspx
     Type: String
     NoEcho: true
   VisionOneRegion:
@@ -43,10 +61,6 @@ Parameters:
       - "Japan"
       - "Singapore"
       - "United States"
-  TrendSolutionTagKey:
-    Description: Tag Key to be used for Trend Cloud One resources
-    Type: String
-    Default: Solution
   TrendSolutionName:
     Description: Tag Key to be used for Trend Cloud One resources
     Type: String
@@ -57,6 +71,12 @@ Parameters:
       have an existing Organizational CloudTrail, please create one before deploying.
     Type: String
     MinLength: "3"
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Description: S3 bucket name for the Trend Cloud One staging assets. Deployment
+      bucket name can include numbers, lowercase letters, uppercase letters, and hyphens
+      (-). It cannot start or end with a hyphen (-).
+    Type: String
   QSS3BucketName:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
@@ -84,38 +104,26 @@ Parameters:
     Type: String
 
 Resources:
-  GetCloudOneRegionAndAccountStack:
-    DependsOn: rCopyZips
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      Parameters:
-        CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        TrendKey: !GetAtt TrendKey.Arn
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/get-cloudone-region-and-account.yaml'
-  
+
   GenerateVisionOneServiceTokenStack:
-    DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         VisionOneAuthenticationTokenSecret: !Ref VisionOneAuthenticationTokenSecret
         VisionOneRegion: !Ref VisionOneRegion
-        TrendKey: !GetAtt TrendKey.Arn
+        TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-generate-enrollment-token.yaml'
 
   VisionOneEnrollmentStack:
-    DependsOn: rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
+        CloudOneRegion: !Ref CloudOneRegion
         VisionOneServiceToken: !GetAtt GenerateVisionOneServiceTokenStack.Outputs.VisionOneEnrollmentToken
-        TrendKey: !GetAtt TrendKey.Arn
+        TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-enrollment.template.yaml'
@@ -123,13 +131,12 @@ Resources:
   WorkloadSecurityIntegrationStack:
     DependsOn:
       - VisionOneEnrollmentStack
-      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
         CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
-        TrendKey: !GetAtt TrendKey.Arn
+        CloudOneRegion: !Ref CloudOneRegion
+        TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/workloadsecurity.template.yaml'
@@ -137,14 +144,13 @@ Resources:
   CloudOneIntegrationStack:
     DependsOn:
       - VisionOneEnrollmentStack
-      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
-        CloudOneAccountID: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneAccountId
+        CloudOneRegion: !Ref CloudOneRegion
+        CloudOneAccountID: !Ref CloudOneAccountID
         CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        TrendKey: !GetAtt TrendKey.Arn
+        TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/cloudone.template.yaml'
@@ -153,13 +159,12 @@ Resources:
   CloudTrailGetInfoStack:
     DependsOn:
       - CloudOneIntegrationStack
-      - rCopyZips
     Type: AWS::CloudFormation::Stack
     Properties:
       Parameters:
-        CloudOneRegion: !GetAtt GetCloudOneRegionAndAccountStack.Outputs.CloudOneRegion
+        CloudOneRegion: !Ref CloudOneRegion
         CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
-        TrendKey: !GetAtt TrendKey.Arn
+        TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
       # This CloudFormation template is not available in the public repository. Instead, it is dynamically generated by an API call to Cloud One
@@ -178,209 +183,10 @@ Resources:
         APIVersion: !GetAtt CloudTrailGetInfoStack.Outputs.APIVersion
       TemplateURL: !GetAtt CloudTrailGetInfoStack.Outputs.TemplateURL
 
-  # Secrets Manager resources to hold the Cloud One API Key and the Vision One Enrollment Token
-  TrendKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: Key used to encrypt/decrypt Trend Micro secrets.
-      Enabled: true
-      EnableKeyRotation: true
-      KeySpec: SYMMETRIC_DEFAULT
-      KeyPolicy:
-        Version: 2012-10-17
-        Id: key-default-1
-        Statement:
-          - Sid: Enable IAM User Permissions
-            Effect: Allow
-            Principal:
-              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
-            Action: 'kms:*'
-            Resource: '*'
-
-  CloudOneApiKeySecret:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Name: !Sub '${TrendSolutionName}-CloudOneApiKey-${AWS::StackName}'
-      Description: Trend Cloud One API Key
-      SecretString: !Ref CloudOneApiKey
-      KmsKeyId: !GetAtt TrendKey.Arn
-
   VisionOneAuthenticationTokenSecret:
     Type: AWS::SecretsManager::Secret
     Properties:
       Name: !Sub '${TrendSolutionName}-VisionOneAuthToken-${AWS::StackName}'
       Description: Trend Vision One Auth Key
       SecretString: !Ref VisionOneAuthenticationToken
-      KmsKeyId: !GetAtt TrendKey.Arn
-
-  # CopyZips Resources
-  TrendStagingS3Bucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W35
-            reason: S3 access logs intentionally not enabled
-      checkov:
-        skip:
-          - id: CKV_AWS_18
-            comment: S3 access logs intentionally not enabled
-    Properties:
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      OwnershipControls:
-        Rules:
-          - ObjectOwnership: BucketOwnerPreferred
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
-      Tags:
-        - Key: !Ref TrendSolutionTagKey
-          Value: !Ref TrendSolutionName
-      VersioningConfiguration:
-        Status: Enabled
-
-  rCopyZips:
-    Type: Custom::CopyZips
-    Properties:
-      ServiceToken: !GetAtt 'rCopyZipsFunction.Arn'
-      DestBucket: !Ref 'TrendStagingS3Bucket'
-      SourceBucket: !Ref 'QSS3BucketName'
-      Prefix: !Sub '${QSS3KeyPrefix}/'
-      Objects:
-        - lambda_functions/packages/AddAWSAccountToCloudOneFunction/lambda.zip
-        - lambda_functions/packages/AWSConnectorCreateLambda/lambda.zip
-        - lambda_functions/packages/GetCloudOneRegionAndAccountFunction/lambda.zip
-        - lambda_functions/packages/GetCloudTrailStackParametersFunction/lambda.zip
-        - lambda_functions/packages/GetExternalIDLambda/lambda.zip
-        - lambda_functions/packages/VisionOneEnrollmentFunction/lambda.zip
-        - lambda_functions/packages/VisionOneGenerateEnrollmentTokenFunction/lambda.zip
-        - lambda_functions/packages/GetOrganizationalTrailBucketName/lambda.zip
-
-
-  rCopyZipsRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-      Path: /
-      Policies:
-        - PolicyName: lambda-copier
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:GetObject
-                  - s3:GetObjectTagging
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/'
-                  - !Sub 'arn:${AWS::Partition}:s3:::${QSS3BucketName}/${QSS3KeyPrefix}/*'
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:DeleteObject
-                  - s3:PutObjectTagging
-                Resource:
-                  - !Sub 'arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/'
-                  - !Sub 'arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/${QSS3KeyPrefix}/*'
-              - Effect: Allow
-                Action:
-                  - s3:ListAllMyBuckets
-                Resource: '*'
-
-  rCopyZipsFunction:
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W58
-            reason: Lambda role provides access to CloudWatch Logs
-          - id: W89
-            reason: Lambda does not need to communicate with VPC resources.
-          - id: W92
-            reason: Lambda does not need reserved concurrent executions.
-      checkov:
-        skip:
-          - id: CKV_AWS_115
-            comment: Lambda does not need reserved concurrent executions.
-          - id: CKV_AWS_116
-            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
-          - id: CKV_AWS_117
-            comment: Lambda does not need to communicate with VPC resources.
-    Type: AWS::Lambda::Function
-    Properties:
-      Description: Copies objects from a source S3 bucket to a destination
-      Handler: index.handler
-      Runtime: python3.9
-      MemorySize: 128
-      Role: !GetAtt 'rCopyZipsRole.Arn'
-      Timeout: 240
-      Code:
-        ZipFile: |
-          import json
-          import logging
-          import threading
-          import boto3
-          import cfnresponse
-          def copy_objects(source_bucket, dest_bucket, prefix, objects):
-              s3 = boto3.client('s3')
-              for o in objects:
-                  key = prefix + o
-                  copy_source = {
-                      'Bucket': source_bucket,
-                      'Key': key
-                  }
-                  print(('copy_source: %s' % copy_source))
-                  print(('dest_bucket = %s'%dest_bucket))
-                  print(('key = %s' %key))
-                  s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,
-                      Key=key)
-          def bucket_exists():
-              s3 = boto3.client('s3')
-              buckets = s3.list_buckets()
-              for bucket in buckets['Buckets']:
-                  return True
-          def delete_objects(bucket, prefix, objects):
-              s3 = boto3.client('s3')
-              if bucket_exists():
-                  objects = {'Objects': [{'Key': prefix + o} for o in objects]}
-                  s3.delete_objects(Bucket=bucket, Delete=objects)
-          def timeout(event, context):
-              logging.error('Execution is about to time out, sending failure response to CloudFormation')
-              cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)
-          def handler(event, context):
-              # make sure we send a failure to CloudFormation if the function
-              # is going to timeout
-              timer = threading.Timer((context.get_remaining_time_in_millis()
-                      / 1000.00) - 0.5, timeout, args=[event, context])
-              timer.start()
-              print(('Received event: %s' % json.dumps(event)))
-              status = cfnresponse.SUCCESS
-              try:
-                  source_bucket = event['ResourceProperties']['SourceBucket']
-                  dest_bucket = event['ResourceProperties']['DestBucket']
-                  prefix = event['ResourceProperties']['Prefix']
-                  objects = event['ResourceProperties']['Objects']
-                  if event['RequestType'] == 'Delete':
-                      delete_objects(dest_bucket, prefix, objects)
-                  else:
-                      copy_objects(source_bucket, dest_bucket, prefix, objects)
-              except Exception as e:
-                  logging.error('Exception: %s' % e, exc_info=True)
-                  status = cfnresponse.FAILED
-              finally:
-                  timer.cancel()
-                  cfnresponse.send(event, context, status, {}, None)
+      KmsKeyId: !Ref TrendKeyArn

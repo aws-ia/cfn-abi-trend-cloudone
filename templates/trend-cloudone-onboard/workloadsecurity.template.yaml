@@ -52,6 +52,12 @@ Parameters:
 Resources:
 #Role for adding AWS Connector to C1WS
   WorkloadSecurityRole:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: Role is provided and used by the Product to create AWS Connector in C1WS.
+              It requires access to all instances to give visibility over all instances.
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:

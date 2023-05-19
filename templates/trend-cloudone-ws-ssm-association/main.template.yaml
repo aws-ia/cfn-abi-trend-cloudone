@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet. Main Root Stack."
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Label:
+          default: 'AccountAdminStatus'
+        Parameters:
+          - AccountAdminStatus
+      - 
+        Label:
+          default: 'Targets'
+        Parameters:
+          - CronJob
+      - 
+        Label:
+          default: 'Trend Cloud One'
+        Parameters:
+          - CloudOneRegionEndpoint
+          - CloudOneApiKeySecret
+Parameters:
+  CronJob:
+    Type: String
+    Description: Specify the CRON Job for future scheduling. [Default is everyday @10:15AM - cron(15 10 * * ? *)]
+    Default: 'cron(15 10 * * ? *)'
+  CloudOneRegionEndpoint:
+    Type: String
+    Description: Enter your Cloud One Account Region Endpoint (US-1)
+  AccountAdminStatus:
+    Type:  String
+    Description: "Are you running this stack in delegated admin[DELEGATED_ADMIN] or directly on management account[SELF]."
+    AllowedValues:
+      - "SELF"
+      - "DELEGATED_ADMIN"
+    Default: "SELF"
+  TrendKeyArn:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
+  CloudOneApiKeySecret:
+    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
+      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+    Type: String
+    NoEcho: true
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Description: S3 bucket name for the Trend Cloud One staging assets. Deployment
+      bucket name can include numbers, lowercase letters, uppercase letters, and hyphens
+      (-). It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3BucketName:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Deployment bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-abi-pilot
+    Description: S3 bucket name for the Deployment assets. Deployment bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
+  QSS3BucketRegion:
+    AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
+    ConstraintDescription: Region name must be a valid AWS region name.
+    Default: us-east-1
+    Description: Region name for the Deployment bucket.
+    Type: String
+
+Resources:
+  GetWorkloadSecurityAgentDeploymentParameters:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        CloudOneWSAPIEndpoint: !Ref CloudOneRegionEndpoint
+        CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
+        TrendKeyArn: !Ref TrendKeyArn
+        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
+        QSS3KeyPrefix: !Ref QSS3KeyPrefix
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-ws-ssm-association/AgentDeploymentScriptParse.template.yaml'
+  
+  SSMAssociationforWorkloadAgent:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        AccountAdminStatus: !Ref AccountAdminStatus
+        DeploymentTargets: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.OrgOUs
+        TargetKey: 'InstanceIds'
+        TargetValues: '*'
+        CronJob: !Ref CronJob
+        dsActivationUrl: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.ActivationURL
+        dsManagerUrl: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.ManagerURL
+        dsTenantId: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.TenantID
+        dsToken: !GetAtt GetWorkloadSecurityAgentDeploymentParameters.Outputs.Token
+      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-ws-ssm-association/c1ws-ssm-orgs.template.yaml'
+
+        
