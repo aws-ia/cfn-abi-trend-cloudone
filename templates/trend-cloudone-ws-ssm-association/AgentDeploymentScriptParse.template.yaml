@@ -69,6 +69,13 @@ Resources:
         S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/AgentDeploymentScriptFunction/lambda.zip
   
   LambdaExecutionRole:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: The '*' is required in order to be able to successfully List the root Org id for 
+              the Organization as well as list all created Organizational Units Id's created. Without 
+              the '*' the script will fail due to a lack of permissions to the Organizations.
     Type: 'AWS::IAM::Role'
     Properties:
       AssumeRolePolicyDocument:

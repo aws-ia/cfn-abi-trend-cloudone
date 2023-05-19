@@ -11,6 +11,7 @@ Metadata:
         - CloudOneApiKey
         - TrendSolutionTagKey
         - TrendSolutionName
+        - OrganizationId
     - Label:
         default: 'Pick which integrations to deploy.'
       Parameters:
@@ -42,6 +43,7 @@ Metadata:
       Parameters:
       - QSS3BucketName
       - QSS3KeyPrefix
+      - pAWSControlTowerExecutionRoleName
 
 Parameters:
   # Common Parameters
@@ -57,6 +59,12 @@ Parameters:
     Description: Tag Key to be used for Trend Cloud One resources
     Type: String
     Default: 'TrendCloudOne'
+  OrganizationId:
+    AllowedPattern: '^$|^o-[a-z0-9]{10,32}$'
+    ConstraintDescription: Must start with 'o-' followed by from 10 to 32 lowercase letters or digits. (e.g. o-abc1234567)
+    Default: ''
+    Description: AWS Organizations ID.
+    Type: String
 
   # Integration Decision Parameters
   DeployCloudTrailIntegration:
@@ -153,6 +161,11 @@ Parameters:
     ConstraintDescription: Region name must be a valid AWS region name.
     Default: us-east-1
     Description: Region name for the Deployment bucket.
+    Type: String
+  pAWSControlTowerExecutionRoleName:
+    AllowedValues: [AWSControlTowerExecution]
+    Default: AWSControlTowerExecution
+    Description: The AWS Control Tower Execution IAM Role used to deploy resources within accounts
     Type: String
 
 Conditions:
@@ -297,6 +310,61 @@ Resources:
       VersioningConfiguration:
         Status: Enabled
 
+  TrendStagingS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: F16
+            reason: GetObject is restricted to AWS accounts within the AWS Organization
+    Properties:
+      Bucket: !Ref TrendStagingS3Bucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowDeploymentRoleGetObject
+            Effect: Allow
+            Action: s3:GetObject
+            Principal: '*'
+            Resource: !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/*
+            Condition:
+              ArnLike:
+                aws:PrincipalArn:
+                  - !Sub arn:${AWS::Partition}:iam::*:role/${pAWSControlTowerExecutionRoleName}
+                  - !Sub arn:${AWS::Partition}:iam::*:role/stacksets-exec-*
+
+          - Sid: OrgCanGetObject
+            Effect: Allow
+            Action: s3:GetObject
+            Principal: '*'
+            Resource: !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/*
+            Condition:
+              StringEquals:
+                aws:PrincipalOrgID: !Ref OrganizationId
+
+          - Sid: DenyExternalPrincipals
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/*
+            Condition:
+              StringNotEquals:
+                aws:PrincipalOrgID:
+                  !Ref OrganizationId
+
+          - Sid: SecureTransport
+            Effect: Deny
+            Action: 's3:*'
+            Principal: '*'
+            Resource:
+              - !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}
+              - !Sub arn:${AWS::Partition}:s3:::${TrendStagingS3Bucket}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: False
+
   rCopyZips:
     Type: Custom::CopyZips
     Properties:
@@ -318,6 +386,11 @@ Resources:
 
 
   rCopyZipsRole:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: The role is used by a custom resource to copy files from the Quick Start S3 bucket to the Trend staging S3 bucket.
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
