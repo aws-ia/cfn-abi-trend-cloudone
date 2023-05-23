@@ -1,0 +1,136 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  CloudOneWSAPIEndpoint:
+    Type: String
+    Description: Enter your Cloud One Account Regional Endpoint
+  TrendKeyArn:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
+  CloudOneApiKeySecret:
+    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
+      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+    Type: String
+    NoEcho: true
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    ConstraintDescription: Deployment bucket name can include numbers, lowercase
+      letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
+      (-).
+    Default: aws-abi-pilot
+    Description: S3 bucket name for the Deployment assets. Deployment bucket name
+      can include numbers, lowercase letters, uppercase letters, and hyphens (-).
+      It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-aws-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
+
+Resources:
+  AgentDeploymentScriptFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+          - id: CKV_AWS_173
+            comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Architectures:
+        - arm64
+      Timeout: 60
+      Handler: app.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          C1_API_ENDPOINT: !Ref CloudOneWSAPIEndpoint
+          CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
+      Code:
+        S3Bucket: !Ref 'TrendStagingS3Bucket'
+        S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/AgentDeploymentScriptFunction/lambda.zip
+  
+  LambdaExecutionRole:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: The '*' is required in order to be able to successfully List the root Org id for 
+              the Organization as well as list all created Organizational Units Id's created. Without 
+              the '*' the script will fail due to a lack of permissions to the Organizations.
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: 'SecretsManagerReadAccess'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "${CloudOneApiKeySecret}*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource:
+                  - !Ref TrendKeyArn
+        - PolicyName: 'OrganizationsListOUsAccess'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'organizations:ListOrganizationalUnitsForParent'
+                  - 'organizations:ListRoots'
+                Resource: '*'
+  CustomInvokeAgentScriptParser:
+    Type: Custom::CustomInvokeAgentScriptParser
+    Properties:
+      ServiceToken: !GetAtt AgentDeploymentScriptFunction.Arn
+
+Outputs:
+  ActivationURL:
+    Description: Cloud One Activation URL
+    Value: !GetAtt CustomInvokeAgentScriptParser.ActivationURL
+  ManagerURL:
+    Description: Cloud One Manager URL
+    Value: !GetAtt CustomInvokeAgentScriptParser.ManagerURL
+  TenantID:
+    Description: Cloud One Tenant ID
+    Value: !GetAtt CustomInvokeAgentScriptParser.TenantID
+  Token:
+    Description: Cloud One Token
+    Value: !GetAtt CustomInvokeAgentScriptParser.Token
+  OrgOUs:
+    Description: AWS Organization OUs
+    Value: !GetAtt CustomInvokeAgentScriptParser.OrganizationalUnits

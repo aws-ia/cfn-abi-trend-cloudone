@@ -1,0 +1,146 @@
+########################################################################
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+########################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Trend Cloud One SecurityHub Integration for AWS Org. Stack that enable the integration on Cloud One."
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: 'Please adjust the fields below as required for deployment.'
+        Parameters:
+          - TrendKeyArn
+          - CloudOneApiKeySecret
+          - CloudOneRegion
+          - CloudOneProductArn
+          - TrendStagingS3Bucket
+          - QSS3KeyPrefix
+Parameters:
+  TrendKeyArn:
+    Description: KMS Key Arn used to encrypt all Trend secrets.
+    Type: String
+  CloudOneApiKeySecret:
+    Description: Arn of Cloud One API Key Secret. You can learn more about it at 
+      https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-api-key/
+    Type: String
+    NoEcho: true
+  CloudOneRegion:
+    Description: Cloud One Region. More info at https://cloudone.trendmicro.com/docs/identity-and-account-management/c1-regions/
+    Type: String
+    Default: 'us-1'
+    AllowedValues:
+       - us-1
+       - trend-us-1
+       - au-1
+       - ie-1
+       - sg-1
+       - in-1
+       - jp-1
+       - ca-1
+       - de-1
+  CloudOneProductArn:
+    AllowedPattern: '^$|^arn:(aws[a-zA-Z-]*){1}:securityhub:[a-z0-9-]+:(\s*|\d{12}):product/[a-zA-Z0-9-.]*/[a-zA-Z0-9-.]*$'
+    Description:
+      A REQUIRED AWS Security Hub ProductARN to enable Cloud One integration. 
+    Type: String
+  TrendStagingS3Bucket:
+    AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
+    Description: S3 bucket name for the Trend Cloud One staging assets. Deployment
+      bucket name can include numbers, lowercase letters, uppercase letters, and hyphens
+      (-). It cannot start or end with a hyphen (-).
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: ^[0-9a-zA-Z-/.]*$
+    ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
+      uppercase letters, hyphens (-), dots(.) and forward slash (/).
+    Default: "cfn-abi-trend-cloudone/"
+    Description: S3 key prefix for the Deployment assets. Deployment key prefix
+      can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
+      forward slash (/).
+    Type: String
+
+Resources:
+  AddSecurityHub:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt AddSecurityHubFunction.Arn
+
+  AddSecurityHubFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+          - id: CKV_AWS_173
+            comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Architectures:
+        - arm64
+      Timeout: 60
+      Handler: app.lambda_handler
+      Role: !GetAtt AddSecurityHubFunctionRole.Arn
+      ReservedConcurrentExecutions: 1
+      Environment:
+        Variables:
+          CloudOneRegion: !Ref CloudOneRegion
+          CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
+          CloudOneProductArn: !Ref CloudOneProductArn
+      Code:
+        S3Bucket: !Ref 'TrendStagingS3Bucket'
+        S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/AddSecurityHub/lambda.zip
+
+  AddSecurityHubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyDocument: 
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource:
+                - !Sub "${CloudOneApiKeySecret}*"
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource:
+                - !Ref TrendKeyArn
+        PolicyName: CloudOneApiKeySecretDecryptPolicy
+      - PolicyDocument: 
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - securityhub:ListEnabledProductsForImport
+                - securityhub:DisableImportFindingsForProduct
+                - securityhub:EnableImportFindingsForProduct
+              Resource:
+                - !Sub arn:${AWS::Partition}:securityhub:${AWS::Region}:${AWS::AccountId}:hub/default
+        PolicyName: SecurityHubPermissions

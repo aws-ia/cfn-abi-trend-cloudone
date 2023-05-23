@@ -7,24 +7,84 @@ project:
   - us-east-1
 
 tests:
-  t1:
+  all-false: # No integration, only common resources.
     parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
       VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
     regions:
     - us-east-1
-    template: templates/trend-cloudone-onboard/main.template.yaml
+    template: templates/main.template.yaml
+  cloudtrail:
+    parameters:
+      DeployCloudTrailIntegration: "True"
+      DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "False"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
   ws-ssm-deployment:
     parameters:
-      DeploymentTargets: 'ou-br9h-5q1xhx7c,ou-br9h-pna1itsq'
-      dsActivationUrl: $[taskcat_ssm_/trend/activation_url]
-      dsManagerUrl: $[taskcat_ssm_/trend/manager_url]
-      dsTenantId: $[taskcat_ssm_/trend/tenant_id]
-      dsToken: $[taskcat_ssm_/trend/ds_token]
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "True"
+      DeploySecurityHubIntegration: "False"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
+      AccountAdminStatus: SELF
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
+  security-hub:
+    parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "True"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      EnableSecurityHub: "false"
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
+  security-hub-no-abi:
+    parameters:
+      DeployCloudTrailIntegration: "False"
+      DeploySSMIntegration: "False"
+      DeploySecurityHubIntegration: "True"
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      EnableSecurityHub: "false"
+    regions:
+    - us-east-1
+    template: templates/main.template.yaml
+  all-integrations:
+    parameters:
+      DeployCloudTrailIntegration: "True"
+      DeploySSMIntegration: "True"
+      DeploySecurityHubIntegration: "True"
+      CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
+      OrganizationId: $[taskcat_ssm_/trend/organization_id]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      QSS3BucketName: $[taskcat_autobucket]
+      QSS3KeyPrefix: $[taskcat_project_name]
+      ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
       AccountAdminStatus: DELEGATED_ADMIN
     regions:
     - us-east-1
-    template: templates/trend-cloudone-ws-ssm-association/c1ws-ssm-orgs.template.yaml
+    template: templates/main.template.yaml
