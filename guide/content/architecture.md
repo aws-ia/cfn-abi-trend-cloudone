@@ -18,27 +18,12 @@ As shown in the diagram, this integration sets up the following:
 
 ##### SSM Integration Architecture Diagram
 
-![CloudTrail Integration Architecture Diagram](/images/ssm-architecture.jpg)
+![SSM Integration Architecture Diagram](/images/ssm-architecture.jpg)
 
-To do.
-
-<!-- 
-As shown in the diagram, this integration sets up the following:
-
-* In all current and AWS accounts in your AWS organization:
-    * <Amazon CloudWatch Events rules> to <detect changes in AWS Config configuration items (CIs)> and <trigger AWS Lambda functions>.
-    * <Service> to perform <Action-1> and <Action-2>.
-
-* In the management account:
-    * <Service> to perform <Action-1> and <Action-2>.
-
-* In the log archive account:
-    * <Service> to perform <Action-1> and <Action-2>.
-
-* In the security tooling account:
-    * <Service> to perform <Action-1> and <Action-2>.
-
--->
+* In each AWS Organizational OU's accounts:
+  * Four System Manager Parameters are created in each AWS Region.
+  * On defined CRON Job, AWS Systems Manager Workload Security Agent Association Package will be trigger for '*' Instances managed by SSM.
+  * This SSM Association package will deploy Workload Security Agent on unmanaged Instances
 
 ##### SecurityHub Integration Architecture Diagram
 

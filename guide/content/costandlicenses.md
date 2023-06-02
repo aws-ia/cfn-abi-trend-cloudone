@@ -18,16 +18,6 @@ Please check current licensing pricing directly at the [Trend Cloud One](https:/
   * 4 Parameters using standard throughput.
   * No additional charge for storage and standard throughput.
 
-<!-- 
-
-<AWS Service cost>
-
-<Any other costs>
-
-<Partner license>
-
-<ABI license>
-
--->
+* Note: Other costs might occur and neither Trend Micro or AWS can be responsible for them.
 
 **Next:** Choose [Architecture](/architecture/index.html) to get started.
