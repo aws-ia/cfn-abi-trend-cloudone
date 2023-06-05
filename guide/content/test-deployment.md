@@ -4,11 +4,6 @@ title: Test the deployment
 description: Test the deployment
 ---
 
-## Step-1
+Please follow the steps provided in the [PostDeployment Options](/post-deployment-steps/index.html) page.
 
-## Step-2
-
-## Step-3
-
-
-**Next:** Choose [Additonal Resources](/additional-resources/index.html) to get started.
+**Next:** Choose [Additional Resources](/additional-resources/index.html) to get started.
