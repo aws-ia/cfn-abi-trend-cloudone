@@ -1,9 +1,9 @@
 ---
 weight: 99
-title: Cleanup Instructions
-description: Instructions to cleanup the resources created by the ABI package
+title: Cleanup instructions
+description: Instructions to clean up the resources created by the ABI package
 ---
 
-## Cleanup Instructions
+## Cleanup instructions
 
-For cleanup, please delete the "parent" CloudFormation stack. No other actions are necessary.
+Delete the parent CloudFormation stack. No other actions are necessary.

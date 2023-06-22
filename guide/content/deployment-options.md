@@ -1,15 +1,15 @@
 ---
 weight: 6
-title: Deployment Options
+title: Deployment options
 description: 
 ---
 
 #### Deployment options supported by this ABI package
 
-Following are the deployment options supported by this ABI package:
+The ABI package supports the following options:
 
-* Launch the [CloudFormation Template in the Management Account](/launch-using-cloudformation/index.html).
+* Launch the [CloudFormation template in the management account](/launch-using-cloudformation/index.html).
 * Launch using [Customizations for Control Tower (CfCT)](https://aws.amazon.com/solutions/implementations/customizations-for-aws-control-tower/) is not yet supported by this module.
 
 
-**Next:** Choose [Pre Deployment Steps](/pre-deployment-steps/index.html) to get started.
+**Next:** [Predeployment steps](/pre-deployment-steps/index.html)
