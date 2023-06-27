@@ -105,16 +105,81 @@ Parameters:
 
 Resources:
 
-  GenerateVisionOneServiceTokenStack:
-    Type: AWS::CloudFormation::Stack
+  ## Begin: Vision One Generate Enrollment Token Resources
+
+  VisionOneGenerateEnrollmentTokenFunction:
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W58
+            reason: Lambda role provides access to CloudWatch Logs
+          - id: W89
+            reason: Lambda does not need to communicate with VPC resources.
+          - id: W92
+            reason: Lambda does not need reserved concurrent executions.
+      checkov:
+        skip:
+          - id: CKV_AWS_115
+            comment: Lambda does not need reserved concurrent executions.
+          - id: CKV_AWS_116
+            comment: DLQ not needed, as Lambda function only triggered by CloudFormation events.
+          - id: CKV_AWS_117
+            comment: Lambda does not need to communicate with VPC resources.
+          - id: CKV_AWS_173
+            comment: Environment variables are not sensitive.
+    Type: AWS::Lambda::Function
     Properties:
-      Parameters:
-        VisionOneAuthenticationTokenSecret: !Ref VisionOneAuthenticationTokenSecret
-        VisionOneRegion: !Ref VisionOneRegion
-        TrendKey: !Ref TrendKeyArn
-        TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
-        QSS3KeyPrefix: !Ref QSS3KeyPrefix
-      TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-onboard/vision-one-generate-enrollment-token.yaml'
+      Runtime: python3.9
+      Architectures:
+        - arm64
+      Timeout: 60
+      Handler: app.lambda_handler
+      Role: !GetAtt VisionOneGenerateEnrollmentTokenFunctionRole.Arn
+      Environment:
+        Variables:
+          VisionOneAuthenticationTokenSecret: !Ref VisionOneAuthenticationTokenSecret
+          VisionOneRegion: !Ref VisionOneRegion
+      Code:
+        S3Bucket: !Ref 'TrendStagingS3Bucket'
+        S3Key: !Sub ${QSS3KeyPrefix}/lambda_functions/packages/VisionOneGenerateEnrollmentTokenFunction/lambda.zip
+
+  VisionOneGenerateEnrollmentToken:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt VisionOneGenerateEnrollmentTokenFunction.Arn
+
+  VisionOneGenerateEnrollmentTokenFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+          Action:
+            - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      Policies:
+        - PolicyDocument: 
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource:
+                  - !Sub "${VisionOneAuthenticationTokenSecret}*"
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource:
+                  - !Ref TrendKeyArn
+          PolicyName: VisionOneGenerateEnrollmentTokenFunctionRolePolicy
+
+  ## End: Vision One Generate Enrollment Token Resources
 
   VisionOneEnrollmentStack:
     Type: AWS::CloudFormation::Stack
@@ -122,7 +187,7 @@ Resources:
       Parameters:
         CloudOneApiKeySecret: !Ref CloudOneApiKeySecret
         CloudOneRegion: !Ref CloudOneRegion
-        VisionOneServiceToken: !GetAtt GenerateVisionOneServiceTokenStack.Outputs.VisionOneEnrollmentToken
+        VisionOneServiceToken: !GetAtt VisionOneGenerateEnrollmentToken.token
         TrendKey: !Ref TrendKeyArn
         TrendStagingS3Bucket: !Ref TrendStagingS3Bucket
         QSS3KeyPrefix: !Ref QSS3KeyPrefix
