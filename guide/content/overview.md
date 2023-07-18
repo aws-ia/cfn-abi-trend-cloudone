@@ -1,15 +1,22 @@
 ---
 weight: 2
 title: Overview
-description: 
+description: Overview of the <partner-product-name> ABI.
 ---
 
+This [AWS Built-In](https://aws.amazon.com/builtin) (ABI) solution deploys the <partner-product-name> integration for AWS Organizations, on the AWS Cloud. It's for <persoma-1> and <persona-2> professionals who want to provide <functionality details> across multiple AWS accounts. To learn more, refer to the [Partner HTTP link](https://partner-name.com/link).
 
+<<<<<<< before updating
 This ABI deploys Trend Micro Integrations for AWS Organizations on the AWS Cloud. It’s for Cloud Operations, SecOps, Cloud Builders and anyone else that want to provide security across multiple AWS accounts. If you are unfamiliar with AWS Built In, refer to the [AWS Built in](https://aws.amazon.com/builtin).
 
 Deploying this ABI package does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations.
 
 ## Security Outcomes
+=======
+**NOTE:** Deploying this ABI solution does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations.
+
+### Solution Overview
+>>>>>>> after updating
 
 The Trend Micro AWS Built In module can be use to help you achieve up to three different security outcomes across your organization:
 
@@ -36,4 +43,4 @@ This ABI module makes sure all your Trend Cloud events for supported modules are
 * [Trend Cloud One](https://aws.amazon.com/marketplace/pp/prodview-g232pyu6l55l4)
 * [Trend Vision One](https://aws.amazon.com/marketplace/pp/prodview-jktqkevcm3zbc)
 
-**Next:** Choose [Terminologies](/terminologies/index.html) to get started.
+**Next:** See [Terminologies](/terminologies/index.html) to familiarize yourself with key terms and concepts used throughout this guide.

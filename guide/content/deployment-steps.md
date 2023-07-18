@@ -1,9 +1,10 @@
 ---
 weight: 8
-title: Deployment steps
-description: Deployment steps
+title: Deployment Steps
+description: Step-by-step instructions for deploying the <project-name>.
 ---
 
+<<<<<<< before updating
 ## Launch the CloudFormation Template in the Management Account
 
 1. Download the cloudformation template from source: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/main/templates/main.template.yaml
@@ -26,8 +27,22 @@ description: Deployment steps
         * **AccountAdminStatus**: `SELF`
       * Parameters related to the SecurityHub Integration:
         * **EnableSecurityHub**: `false`, unless you don't have Security Hub enabled. `true` would enable Security Hub in the Audit Account
+=======
+## Launch the CloudFormation template in the management account
 
-3. Choose both the **Capabilities** and select **Submit** to launch the stack.
+
+1. Download the Cloudformation template from the following location: https://<abi-template-location>
+2. Launch CloudFormation template in your AWS Control Tower home region.
+    * Stack name: `template-<partner-name>-enable-integrations`
+    * List parameters with [default values and update below example as needed]
+        * **EnableIntegrationsStackName**: `template-<partner-name>-enable-integrations`
+        * **EnableIntegrationsStackRegion**: `us-east-1`
+        * **EnableIntegrationsStackSetAdminRoleName**: `AWSCloudFormationStackSetAdministrationRole`
+        * **EnableIntegrationsStackSetExecutionRoleName**: `AWSCloudFormationStackSetExecutionRole`
+        * **EnableIntegrationsStackSetExecutionRoleArn**: `arn:aws:iam::<account-id>:role/AWSCloudFormationStackSetExecutionRole`
+>>>>>>> after updating
+
+3. Select both the **Capabilities** and choose **Submit** to launch the stack.
 
     [] I acknowledge that AWS CloudFormation might create IAM resources with custom names.
 
@@ -35,15 +50,20 @@ description: Deployment steps
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE` state.
 
+<<<<<<< before updating
 ## Launch using Customizations for Control Tower (CfCT)
 
 {{% notice warning %}}
 Deploying using Customizations for Control Tower (CfCT) is not yet supported for this ABI Module.
 {{% /notice %}}
+=======
 
-[Customizations for AWS Control Tower](https://aws.amazon.com/solutions/implementations/customizations-for-aws-control-tower/) combines AWS Control Tower and other highly-available, trusted AWS services to help customers more quickly set up a secure, multi-account AWS environment using AWS best practices. You can easily add customizations to your AWS Control Tower landing zone using an AWS CloudFormation template and service control policies (SCPs). You can deploy the custom template and policies to individual accounts and organizational units (OUs) within your organization. It also integrates with AWS Control Tower lifecycle events to ensure that resource deployments stay in sync with your landing zone. For example, when a new account is created using the AWS Control Tower account factory, Customizations for AWS Control Tower ensures that all resources attached to the account's OUs will be automatically deployed.
+## Launch using Customizations for Control Tower
+>>>>>>> after updating
 
-The templates provided as part of the ABI packages are deployable using Customizations for Control Tower. Please check below for additional details.
+[Customizations for AWS Control Tower](https://aws.amazon.com/solutions/implementations/customizations-for-aws-control-tower/) (CfCT) combines AWS Control Tower and other AWS services to help you set up an AWS environment. You can deploy the templates provided with the ABI solution using CfCT.
+
+The templates provided as part of the ABI solution are deployable using Customizations for Control Tower. Please check below for additional details.
 
 ### Pre-requisites
 
@@ -51,7 +71,11 @@ The templates provided as part of the ABI packages are deployable using Customiz
 
 ### How it works
 
+<<<<<<< before updating
 To deploy this integration page using CfCT solution, add the following blurb to the `manifest.yaml` file from your CfCT solution and update the account/ou names as needed.
+=======
+To deploy the sample partner integration page using CfCT solution, add the following blurb to the `manifest.yaml` file from your CfCT solution and then update the account and organizational unit (OU) names as needed.
+>>>>>>> after updating
 
 ```
 resources:
@@ -91,5 +115,19 @@ resources:
       accounts:
         - [[MANAGEMENT-AWS-ACCOUNT-ID]]
 ```
+## Partner specific steps [UPDATE AS NEEDED]
+After the stack deployment is complete, verfiy following resources [....]:
 
+  - <resource-1>
+  - <resource-2>
+
+Open <partner-console> and navigate to <section> and perform following steps:
+   1. <step-1>
+   2. <step-2>
+
+<<<<<<< before updating
 **Next:** Choose [Postdeployment Options](/post-deployment-steps/index.html) to get started.
+=======
+
+**Next:** Go to [Postdeployment steps](/post-deployment-steps/index.html) to verify the deployment.
+>>>>>>> after updating
