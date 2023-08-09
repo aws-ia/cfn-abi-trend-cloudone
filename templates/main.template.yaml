@@ -150,7 +150,7 @@ Parameters:
     AllowedPattern: ^[0-9a-zA-Z-/.]*$
     ConstraintDescription: Deployment key prefix can include numbers, lowercase letters,
       uppercase letters, hyphens (-), dots(.) and forward slash (/).
-    Default: "cfn-abi-trend-cloudone/"
+    Default: "cfn-abi-trend-cloudone"
     Description: S3 key prefix for the Deployment assets. Deployment key prefix
       can include numbers, lowercase letters, uppercase letters, hyphens (-), dots(.) and
       forward slash (/).
