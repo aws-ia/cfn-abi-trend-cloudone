@@ -1,31 +1,31 @@
 ---
 weight: 5
 title: Architecture
-description: Solution architecture.
+description: Solution architecture
 ---
 
 Deploying this ABI package with default parameters builds the following architectures.
 
-##### CloudTrail Integration Architecture Diagram
+##### AWS CloudTrail integration architecture diagram
 
-![CloudTrail Integration Architecture Diagram](/images/cloudtrail-architecture.png)
+![AWS CloudTrail integration architecture diagram](/images/cloudtrail-architecture.png)
 
 As shown in the diagram, this integration sets up the following:
 
 * In the log archive account:
-  * Amazon CloudWatch Events rules to detect new PUTs in the Organizational CloudTrail S3 Bucket and trigger a AWS Lambda function
-  * This function forwards the new CloudTrail events to Trend Vision One
+  * Amazon CloudWatch events rules to detect new PUTs in the organizational CloudTrail S3 bucket and trigger an AWS Lambda function.
+  * The Lambda function forwards the new CloudTrail events to Trend Vision One.
 
-##### SSM Integration Architecture Diagram
+##### SSM integration architecture diagram
 
-![SSM Integration Architecture Diagram](/images/ssm-architecture.jpg)
+![SSM integration architecture diagram](/images/ssm-architecture.jpg)
 
-* In each AWS Organizational OU's accounts:
-  * Four System Manager Parameters are created in each AWS Region.
-  * On defined CRON Job, AWS Systems Manager Workload Security Agent Association Package will be trigger for '*' Instances managed by SSM.
-  * This SSM Association package will deploy Workload Security Agent on unmanaged Instances
+* In each AWS Organizations account:
+  * Four system-manager parameters are created in each AWS Region.
+  * For a defined CRON job, the AWS Systems Manager workload security agent association package triggers for '*' instances managed by SSM.
+  * The SSM association package deploys workload security agent for unmanaged instances.
 
-##### SecurityHub Integration Architecture Diagram
+##### AWS Security Hub integration architecture diagram
 
 To do.
 
@@ -49,4 +49,4 @@ As shown in the diagram, this integration sets up the following:
 
 -->
 
-**Next:** Choose [Deployment Options](/deployment-options/index.html) to get started.
+**Next:** [Deployment Options](/deployment-options/index.html)

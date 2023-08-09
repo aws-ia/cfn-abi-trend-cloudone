@@ -1,13 +1,13 @@
 ---
 weight: 1
-title: Trend Micro - AWS Built In module
-description: Trend Micro - AWS Built In module
+title: Trend Micro AWS Built-In module
+description: Trend Micro AWS Built-In module
 ---
 
-# Trend - AWS Built In module
+# Trend Micro AWS Built-In module
 
-The purpose of this document is to walk you through the process of deploying Trend Micro - AWS Built In module. This document is intended for Customers who are using the `cfn-abi-trend-cloudone` AWS Built In program(ABI) and in process of building an ABI project.
+This document walks you through the process of deploying the Trend Micro AWS Built-In (ABI) module to the AWS Cloud. It's intended for customers who are using the `cfn-abi-trend-cloudone` ABI and building an ABI project.
 
-The AWS Built-in program is a differentiation program that validates Partner solutions which have automated their solution integrations with relevant AWS foundational services like identity, management, security and operations.  This program helps customers find and deploy a validated Partner solution that addresses specific customer use cases while providing deep visibility and control of AWS native service integration.
+The AWS Built-In program validates solutions that are integrated with relevant AWS foundational services such as identity, management, security, and operations. This program helps customers find and deploy a validated solution that addresses specific customer use cases while providing visibility and control of AWS native service integrations.
 
-Choose [Overview](/overview/index.html) to get started.
+**Next:** [Overview](/overview/index.html)

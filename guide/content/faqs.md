@@ -1,11 +1,9 @@
 ---
 weight: 100
 title: FAQs
-description: Frequently asked questions
+description: FAQs
 ---
 
-## Can I contribute to this repository?
+## How do I contribute to this repository?
 
-Yes, this shared under Apache License, version 2.0 (the "License"). Please submit a GitHub issue if you see an issues or improvements. If you like to build and contribute a fix or enhancement, please submit a GitHub pull request with your changes.
-
-All pull requests will go through auto validations and human reviews before it is merged.
+This solution is covered under Apache License version 2.0 (the "License"). For problems, submit a GitHub **Issue**. If you want to contribute a fix or enhancement, submit a GitHub pull request with your changes. All pull requests are reviewed before being merged.
