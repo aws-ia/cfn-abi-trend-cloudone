@@ -1,23 +1,23 @@
 ---
 weight: 4
-title: Cost and licenses
-description: Cost of the solution and licenses required.
+title: Costs and licenses
+description: Costs and required licenses
 ---
 
-## Trend Micro Licensing Costs
+## Trend Micro licensing costs
 
-Please check current licensing pricing directly at the [Trend Cloud One](https://aws.amazon.com/marketplace/pp/prodview-g232pyu6l55l4) and [Trend Vision One](https://aws.amazon.com/marketplace/pp/prodview-jktqkevcm3zbc) AWS Marketplace pages.
+For current pricing, refer to [Trend Cloud One](https://aws.amazon.com/marketplace/pp/prodview-g232pyu6l55l4) and [Trend Enterprise Security Solutions](https://aws.amazon.com/marketplace/pp/prodview-jktqkevcm3zbc) on AWS Marketplace.
 
-## AWS Services Cost
+## AWS service costs
 
 * Secrets Manager:
-  * 1 secret
-  * The storage cost is $0.40 per secret per month and API interactions cost is $0.05 per 10,000 API calls.
+  * One secret.
+  * Storage is $0.40 per secret per month, and API interactions are $0.05 per 10,000 API calls.
 
 * SSM Parameter Store:
-  * 4 Parameters using standard throughput.
+  * Four parameters using standard throughput.
   * No additional charge for storage and standard throughput.
 
-* Note: Other costs might occur and neither Trend Micro or AWS can be responsible for them.
+* Note: You are responsible for the cost of the AWS services and any third-party licenses used while running this solution.
 
-**Next:** Choose [Architecture](/architecture/index.html) to get started.
+**Next:** [Architecture](/architecture/index.html)

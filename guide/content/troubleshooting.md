@@ -4,17 +4,17 @@ title: Troubleshooting
 description: Troubleshooting
 ---
 
-## Common ABI Issues
+## Common ABI issues
 
-For troubleshooting common ABI issues, refer to the [AWS Built In General Information Guide](http://link-to-reference-architecture) and [Troubleshooting CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html).
+For troubleshooting common ABI issues, refer to the [AWS Built-In General Information Guide](http://link-to-reference-architecture) and [Troubleshooting CloudFormation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/troubleshooting.html).
 
-## SSM Integration
+## SSM integration
 
-### No Green Lights
+### No green indicator
 
 1. Log in to your AWS account.
-2. Navigate to **Systems Manager > Parameter Store** and confirm the 4 created parameters exist.
-3. Navigate to **Systems Manager > State Manager**.
-4. Click the **Association ID > Execution History > Click on a Failed execution to see details** for the Trend Micro Agent Association.
+2. Navigate to **Systems Manager** > **Parameter Store**, and confirm that the four created parameters exist.
+3. Navigate to **Systems Manager** > **State Manager**.
+4. For agent association details, choose **Association ID** > **Execution History** > **Failed execution**.
 
-**Next:** Choose [Feedback](/feedback/index.html).
+**Next:** [Feedback](/feedback/index.html)
