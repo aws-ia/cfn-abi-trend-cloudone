@@ -13,7 +13,7 @@ tests:
       DeploySSMIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       OrganizationId: $[taskcat_ssm_/trend/organization_id]
-      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_auth_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
@@ -27,7 +27,7 @@ tests:
       DeploySecurityHubIntegration: "False"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       OrganizationId: $[taskcat_ssm_/trend/organization_id]
-      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_auth_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
@@ -80,7 +80,7 @@ tests:
       DeploySecurityHubIntegration: "True"
       CloudOneApiKey: $[taskcat_ssm_/trend/cloudone_svc_apikey]
       OrganizationId: $[taskcat_ssm_/trend/organization_id]
-      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_authentication_token]
+      VisionOneAuthenticationToken: $[taskcat_ssm_/trend/visionone_auth_token]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
       ExistingOrganizationalCloudtrailBucketName: $[taskcat_ssm_/trend/existing_organizational_cloudtrail_bucket_name]
