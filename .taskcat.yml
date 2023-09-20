@@ -56,7 +56,7 @@ tests:
       OrganizationId: $[taskcat_ssm_/trend/organization_id]
       QSS3BucketName: $[taskcat_autobucket]
       QSS3KeyPrefix: $[taskcat_project_name]
-      EnableSecurityHub: "false"
+      EnableSecurityHub: "true"
     regions:
     - us-east-1
     template: templates/main.template.yaml
