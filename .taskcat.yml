@@ -1,6 +1,6 @@
 project:
   name: cfn-abi-trend-cloudone
-  owner: raphael_bottino@trendmicro.com #We need a DL for this.
+  owner: raphael_bottino@trendmicro.com #We need a DL for this[UPDATE REQUIRED].
   package_lambda: true
   shorten_stack_name: true
   regions:
