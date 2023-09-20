@@ -227,6 +227,10 @@ Resources:
         QSS3BucketName: !Ref QSS3BucketName
         QSS3BucketRegion: !Ref QSS3BucketRegion
         EnableSecurityHub: !Ref EnableSecurityHub
+        pSRASourceS3BucketName: !Ref QSS3BucketName
+        pSRAStagingS3KeyPrefix: !Ref QSS3KeyPrefix
+        pSRAS3BucketRegion: !Ref QSS3BucketRegion
+
       TemplateURL: !Sub 'https://${QSS3BucketName}.s3.${QSS3BucketRegion}.${AWS::URLSuffix}/${QSS3KeyPrefix}/templates/trend-cloudone-securityhub/main.template.yaml'
       Tags:
         - Key: Solution

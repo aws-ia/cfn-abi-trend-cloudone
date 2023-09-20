@@ -134,7 +134,7 @@ Parameters:
   pSRAStagingS3KeyPrefix:
     AllowedPattern: ^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$
     Type: String
-    Default: cfn-abi-aws-reference-guide
+    Default: cfn-abi-aws-security-hub
   pSRAS3BucketRegion:
     AllowedPattern: ^[a-z][a-z]-[a-z]*-[0-9]*$
     Type: String
