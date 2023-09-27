@@ -25,12 +25,6 @@ Distributor is an integrated feature of AWS Systems Manager that you can use to 
 
 This ABI module is deployed across either selected or all accounts and Regions. It helps ensure that the Trend Cloud One Workload Security agent deploys to your targeted EC2 instances.
 
-### SecurityHub integration
-
-Security Hub collects security data from AWS accounts, services, and supported third-party partner products. It also helps you analyze security trends to identify high-priority security issues. By integrating Trend Cloud One, you can use aggregated security findings of your containers inside Security Hub.
-
-This ABI module helps ensure that your Trend Cloud events for supported modules are visible in your primary Security Hub account and Region.
-
 ## AWS Marketplace listings
 
 * [Trend Cloud One](https://aws.amazon.com/marketplace/pp/prodview-g232pyu6l55l4)
