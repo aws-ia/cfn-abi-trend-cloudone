@@ -1,15 +1,26 @@
 ---
 weight: 9
 title: Postdeployment options
+<<<<<<< before updating
 description: Postdeployment options
+=======
+description: Postdeployment options for the <project-name> ABI solution.
+>>>>>>> after updating
 ---
 
 ## Verifying the solution functionality
 
+<<<<<<< before updating
 Verifying the solution functionality depends on what modules and integrations you deployed in the previous step.
+=======
+After successfully deploying the <project-name>, verify that the solution is working as expected. Perform the following steps:
+
+## Parnter capability 1
+>>>>>>> after updating
 
 ### Verifying CloudTrail analysis
 
+<<<<<<< before updating
 1. Log in to your [Trend Cloud One](https://cloudone.trendmicro.com/home) account.
 2. Choose [Integrations](https://cloudone.trendmicro.com/integrations/) at the bottom of the page and then [Trend Vision One](https://cloudone.trendmicro.com/integrations/vision-one) from the left-hand side of the page.
 3. Verify that the status of AWS CloudTrail is **Connected**.
@@ -27,3 +38,6 @@ Verifying the solution functionality depends on what modules and integrations yo
 4. A green indicator means the agent deployed successfully.
 
 **Next:** [Test the deployment](/test-deployment/index.html)
+=======
+**Next:** See [Test the deployment](/test-deployment/index.html) to validate the solution’s functionality.
+>>>>>>> after updating
