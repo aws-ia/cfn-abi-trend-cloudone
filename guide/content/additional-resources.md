@@ -1,7 +1,11 @@
 ---
 weight: 11
 title: Additional resources
+<<<<<<< before updating
 description: Additional resources
+=======
+description: Additional resources.
+>>>>>>> after updating
 ---
 
 ## Partner documentation
@@ -29,4 +33,9 @@ Refer to the [FAQs](/faqs/index.html) page.
 * [AWS Security Reference Architecture (AWS SRA)](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html)
 * [Code repository for AWS SRA examples](https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/code-repo.html)
 
+<<<<<<< before updating
 **Next:** [Troubleshooting](/troubleshooting/index.html)
+=======
+
+**Next:** See [Troubleshooting](/troubleshooting/index.html) for common issues related to the <project-name>.
+>>>>>>> after updating
