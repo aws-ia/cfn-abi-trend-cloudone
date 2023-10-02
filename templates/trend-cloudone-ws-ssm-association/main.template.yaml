@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet. Main Root Stack."
+Description: "Trend Cloud One WS agent deployment for AWS Org via SSM association StackSet. Main Root Stack. (abi-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln8404ws)"
+
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Get Trend Cloud One region and account id given an API Key.
+Description: Get Trend Cloud One region and account id given an API Key. (abi-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln8403d2)
 
 Parameters:
   CloudOneApiKeySecret:

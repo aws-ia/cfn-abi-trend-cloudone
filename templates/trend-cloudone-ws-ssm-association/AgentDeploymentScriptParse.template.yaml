@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: Agent Deployment for Trendmicro (abi-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln84044z)
 Parameters:
   CloudOneWSAPIEndpoint:
     Type: String
