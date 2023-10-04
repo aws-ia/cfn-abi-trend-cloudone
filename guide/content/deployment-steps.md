@@ -6,7 +6,7 @@ description: Deployment steps
 
 ## Launch the CloudFormation template in the AWS Organizations management account {#launch-cfn}
 
-1. Download the CloudFormation template from https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/main/templates/main.template.yaml
+1. Download the [CloudFormation template](https://a.co/aMaMlJd) to your local machine.
 2. Launch the CloudFormation template in your AWS Control Tower home Region.
     * Stack name: `template-trend-micro-enable-integrations`
     * List parameters with [call out default values and update below example as needed]
@@ -58,7 +58,7 @@ To deploy this integration page using CfCT, add the following blurb to the `mani
 ```yaml
 resources:
   - name: sra-enable-partner1-solution
-    resource_file: https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/main/templates/main.template.yaml
+    resource_file: https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/templates/main.template.yaml
     deploy_method: stack_set
     parameters:
       - parameter_key: pProductArn
