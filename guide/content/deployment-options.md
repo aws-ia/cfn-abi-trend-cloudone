@@ -8,8 +8,8 @@ description:
 
 The ABI package supports the following options:
 
-* Launch the [CloudFormation template in the management account](/launch-using-cloudformation/index.html).
-* Launch using [Customizations for Control Tower (CfCT)](https://aws.amazon.com/solutions/implementations/customizations-for-aws-control-tower/) is not yet supported by this module.
+* Launch the [CloudFormation template in the AWS Management Console](/deployment-steps/#launch-cfn).
+* Launch using [Customizations for AWS Control Tower (CfCT)](/deployment-steps/#launch-cfct).
 
 
 **Next:** [Predeployment steps](/pre-deployment-steps/index.html)

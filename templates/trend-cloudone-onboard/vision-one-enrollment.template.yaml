@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Trend Cloud One Workload Security Integration.
+Description: Trend Cloud One Workload Security Integration. (abi-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln84009i)
 
 Parameters:
   CloudOneApiKeySecret:
@@ -33,7 +33,7 @@ Parameters:
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: aws-abi-pilot
+    Default: aws-abi
     Description: S3 bucket name for the Deployment assets. Deployment bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).

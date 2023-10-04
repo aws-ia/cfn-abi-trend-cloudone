@@ -25,11 +25,11 @@ As shown in the diagram, this integration sets up the following:
   * For a defined CRON job, the AWS Systems Manager workload security agent association package triggers for '*' instances managed by SSM.
   * The SSM association package deploys workload security agent for unmanaged instances.
 
+<!--
 ##### AWS Security Hub integration architecture diagram
 
 To do.
 
-<!--
 ![SecurityHub Integration Architecture Diagram](/images/)
 
 As shown in the diagram, this integration sets up the following:
