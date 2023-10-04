@@ -37,10 +37,6 @@ Wait for the CloudFormation status to change to `CREATE_COMPLETE`.
 
 ## Launch using Customizations for Control Tower {#launch-cfct}
 
-{{% notice warning %}}
-Deploying Customizations for Control Tower (CfCT) is not yet supported for this ABI module.
-{{% /notice %}}
-
 [CfCT](https://aws.amazon.com/solutions/implementations/customizations-for-aws-control-tower/) combines AWS Control Tower and other highly available, trusted AWS services to help customers more quickly set up a secure, multiaccount AWS environment according to AWS best practices. You can add customizations to your AWS Control Tower landing zone using an AWS CloudFormation template and service control policies (SCPs). You can deploy the custom template and policies to individual accounts and organizational units within your organization.
 
 CfCT also integrates with AWS Control Tower lifecycle events to help ensure that resource deployments stay in sync with your landing zone. For example, when a new account is created using the AWS Control Tower account factory, CfCt helps to ensure that all resources attached to the account's organizational unit are automatically deployed.
