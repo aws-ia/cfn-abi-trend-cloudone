@@ -79,7 +79,7 @@ You can run the following:
 export BUCKET="your-cloudtrail-bucket"
 export APIKEY="your-cloudone-apikey"
 export TOKEN="your-visionone-enrollment-token"
-aws cloudformation create-stack --stack-name common-onboard-test --template-url https://aws-abi-pilot.s3.us-east-1.amazonaws.com/latest/cfn-abi-trend-cloudone/templates/trend-cloudone-onboard/main.template.yaml --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --parameters ParameterKey=ExistingCloudtrailBucketName,ParameterValue=$BUCKET ParameterKey=CloudOneApiKey,ParameterValue=$APIKEY ParameterKey=VisionOneServiceToken,ParameterValue=$TOKEN ParameterKey=QSS3KeyPrefix,ParameterValue=$HASH/
+aws cloudformation create-stack --stack-name common-onboard-test --template-url https://aws-abi.s3.us-east-1.amazonaws.com/latest/cfn-abi-trend-cloudone/templates/trend-cloudone-onboard/main.template.yaml --capabilities CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND --parameters ParameterKey=ExistingCloudtrailBucketName,ParameterValue=$BUCKET ParameterKey=CloudOneApiKey,ParameterValue=$APIKEY ParameterKey=VisionOneServiceToken,ParameterValue=$TOKEN ParameterKey=QSS3KeyPrefix,ParameterValue=$HASH/
 ```
 
 ## Removal or Deployment Failure

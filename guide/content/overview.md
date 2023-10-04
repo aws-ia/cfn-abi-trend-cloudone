@@ -11,7 +11,7 @@ Deploying this ABI package does not guarantee an organization’s compliance wit
 
 ## Security outcomes
 
-The Trend Micro AWS Built-In module can be used to help you set up three different security outcomes across your organization.
+The Trend Micro AWS Built-In module can be used to help you set up two different security outcomes across your organization.
 
 ### AWS CloudTrail analysis
 

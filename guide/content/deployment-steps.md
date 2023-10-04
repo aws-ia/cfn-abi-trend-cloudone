@@ -4,9 +4,9 @@ title: Deployment steps
 description: Deployment steps
 ---
 
-## Launch the CloudFormation template in the management account
+## Launch the CloudFormation template in the AWS Organizations management account {#launch-cfn}
 
-1. Download the CloudFormation template from https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/main/templates/main.template.yaml
+1. Download the [CloudFormation template](https://a.co/aMaMlJd) to your local machine.
 2. Launch the CloudFormation template in your AWS Control Tower home Region.
     * Stack name: `template-trend-micro-enable-integrations`
     * List parameters with [call out default values and update below example as needed]
@@ -35,7 +35,7 @@ description: Deployment steps
 
 Wait for the CloudFormation status to change to `CREATE_COMPLETE`.
 
-## Launch using Customizations for Control Tower (CfCT)
+## Launch using Customizations for Control Tower {#launch-cfct}
 
 {{% notice warning %}}
 Deploying Customizations for Control Tower (CfCT) is not yet supported for this ABI module.
@@ -55,16 +55,16 @@ The templates provided as part of the ABI packages are deployable using CfCT. Fo
 
 To deploy this integration page using CfCT, add the following blurb to the `manifest.yaml` file, and update the accounts and organizational units as needed.
 
-```
+```yaml
 resources:
   - name: sra-enable-partner1-solution
-    resource_file: https://aws-abi-pilot.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/main/templates/main.template.yaml
+    resource_file: https://aws-abi.s3.us-east-1.amazonaws.com/cfn-abi-trend-cloudone/templates/main.template.yaml
     deploy_method: stack_set
     parameters:
       - parameter_key: pProductArn
         parameter_value: arn:aws:securityhub:us-east-1::product/cloud-custodian/cloud-custodian
       - parameter_key: pSRASourceS3BucketName
-        parameter_value: aws-abi-pilot
+        parameter_value: aws-abi
       - parameter_key: pSRAStagingS3KeyPrefix
         parameter_value: cfn-abi-aws-reference-guide
       - parameter_key: CloudOneApiKey
