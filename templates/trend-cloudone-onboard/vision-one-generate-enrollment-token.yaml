@@ -25,7 +25,7 @@ Parameters:
     ConstraintDescription: Deployment bucket name can include numbers, lowercase
       letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen
       (-).
-    Default: aws-abi-pilot
+    Default: aws-abi
     Description: S3 bucket name for the Deployment assets. Deployment bucket name
       can include numbers, lowercase letters, uppercase letters, and hyphens (-).
       It cannot start or end with a hyphen (-).
