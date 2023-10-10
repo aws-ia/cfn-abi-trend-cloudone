@@ -1,11 +1,11 @@
 ---
 weight: 2
 title: Overview
-description: 
+description: ABI overview
 ---
 
 
-This ABI deploys Trend Micro integrations for AWS Organizations to the AWS Cloud. It’s for cloud operations, SecOps, cloud builders, and others who want to implement security across multiple AWS accounts. If you are unfamiliar with AWS Built-In, refer to [AWS Built-In](https://aws.amazon.com/builtin).
+This ABI deploys Trend Micro integrations for AWS Organizations to the AWS Cloud. It’s for cloud operations, SecOps, cloud builders, and others who want to implement security across multiple AWS accounts. If you are unfamiliar with AWS Built-In, refer to [AWS Built-In](https://aws.amazon.com/partners/built-in-partner-solutions/).
 
 Deploying this ABI package does not guarantee an organization’s compliance with any laws, certifications, policies, or other regulations.
 

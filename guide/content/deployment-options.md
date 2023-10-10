@@ -1,7 +1,7 @@
 ---
 weight: 6
 title: Deployment options
-description: 
+description: Deployment options.
 ---
 
 #### Deployment options supported by this ABI package
