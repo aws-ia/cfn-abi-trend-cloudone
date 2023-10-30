@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Trend Vision One Generate and Delete Enrollment Token. (abi-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln8401ta)
+Description: Trend Vision One Generate and Delete Enrollment Token. (abp-1kirFQBF75MfEQ3RbMQHRb-AjPZXDiXyrPBYf1SiahJE-ln8401ta)
 
 Parameters:
   VisionOneAuthenticationTokenSecret:
