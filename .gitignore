@@ -161,15 +161,45 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+<<<<<<< before updating
 # taskcat
+=======
+# JetBrains IDE
+.idea/
+
+.DS_Store
+
+.taskcat/
+taskcat_outputs/
+*.zip
+=======
+
+.DS_Store
+
+# Taskcat files
+>>>>>>> after updating
 taskcat_outputs/
 .taskcat/
 
 # since the zips are automatically generated, we don't want to check them in
 lambda_functions/packages/
 
+<<<<<<< before updating
 # General
 .DS_Store
 
 # Ash
 aggregated_results.txt
+=======
+# Package files
+lambda.zip
+
+# Visual Studio Code IDE
+.vscode/
+
+# Scoutsuite files
+/scoutsuite-report/
+scoutsuite-report.zip
+scoutsuite_sysout.txt
+scoutsuite_s3_filename.txt
+>>>>>>> after updating
