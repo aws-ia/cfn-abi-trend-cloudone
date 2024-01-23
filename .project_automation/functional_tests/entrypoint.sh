@@ -5,40 +5,47 @@
 PROJECT_PATH=${BASE_PATH}/project
 PROJECT_TYPE_PATH=${BASE_PATH}/projecttype
 
+export REGION=$(grep -A1 regions: .taskcat.yml | awk '/ - / {print $NF}' |sort | uniq -c |sort -k1| head -1 |awk '{print $NF}')
+
 cd ${PROJECT_PATH}
 
-regions=(us-east-1 us-east-2 us-west-2 us-west-1)
-
-for region in ${regions[@]}
-do
-    echo "Cleanup running in region: $region"
-    export AWS_DEFAULT_REGION=$region
+# Function to perform cleanup in a specific region
+cleanup_region() {
+    echo "Cleanup running in region: $1"
+    export AWS_DEFAULT_REGION=$1
     python3 scripts/cleanup_config.py -C scripts/cleanup_config.json
-done
+}
 
-taskcat test run -t security-hub 
+# Function to perform cleanup in all regions
+cleanup_all_regions() {
+    export AWS_DEFAULT_REGION=$REGION
+    regions=($(aws ec2 describe-regions --query "Regions[*].RegionName" --output text))
+    for region in ${regions[@]}
+    do
+        cleanup_region ${region}
+    done
+}
 
-for region in ${regions[@]}
-do
-    echo "Cleanup running in region: $region"
-    export AWS_DEFAULT_REGION=$region
-    python3 scripts/cleanup_config.py -C scripts/cleanup_config.json
-done
+# Function to run taskcat e2e test
+run_test() {
+    cleanup_all_regions
+    unset AWS_DEFAULT_REGION
+    if [ -z "$1" ]; then
+        echo "Running e2e test: ALL"
+        taskcat test run -n
+        .project_automation/functional_tests/scoutsuite/scoutsuite.sh
+    else
+        echo "Running e2e test: $1"
+        taskcat test run -n -t $1
+        .project_automation/functional_tests/scoutsuite/scoutsuite.sh
+    fi
+}
 
-echo $AWS_DEFAULT_REGION
-unset AWS_DEFAULT_REGION
-echo $AWS_DEFAULT_REGION
+run_test "security-hub" 
 
-taskcat test run -t ws-ssm-deployment
+run_test "ws-ssm-deployment"
 
-for region in ${regions[@]}
-do
-    echo "Cleanup running in region: $region"
-    export AWS_DEFAULT_REGION=$region
-    python3 scripts/cleanup_config.py -C scripts/cleanup_config.json
-done
-
-taskcat test run -t security-hub-no-abi
+run_test "security-hub-no-abi"
 
 ## Executing ash tool
 
