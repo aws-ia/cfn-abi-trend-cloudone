@@ -28,7 +28,6 @@ Parameters:
   DeploymentTargets:
     Description: Specify AWS Organizational Unit IDs within AWS Organization whose accounts have the target instances (ou-name) for distribution. (Account IDs are only allowed when updating)
     Type: CommaDelimitedList
-    Default: ''
   TargetKey:
     Type: String
     Description: Specify which instances have to be targeted for this solution. Allowed values - ParameterValues, ResourceGroup or begin with tag:, AWS::EC2::Instance, InstanceIds (default), instanceids. Refer https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_Target.html for more details.
