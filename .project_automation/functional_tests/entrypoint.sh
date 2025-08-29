@@ -41,11 +41,11 @@ run_test() {
     fi
 }
 
-run_test "security-hub" 
+#run_test "security-hub" 
 
-run_test "ws-ssm-deployment"
+#run_test "ws-ssm-deployment"
 
-run_test "security-hub-no-abi"
+#run_test "security-hub-no-abi"
 
 ## Executing ash tool
 

@@ -66,10 +66,6 @@ These are going to be changed in case you decide to host the templates yourself.
 
 ## Deployment
 
-### Via Dashboard
-
-[![Launch Stack](https://cdn.rawgit.com/buildkite/cloudformation-launch-stack-button-svg/master/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=CloudOne&templateURL=https://cloudone-community.s3.us-east-1.amazonaws.com/latest/Common/Cloud-Account/aws-cfn-cloud-account-connector/main.template.yaml)
-
 ### Via CLI
 
 You can run the following:
